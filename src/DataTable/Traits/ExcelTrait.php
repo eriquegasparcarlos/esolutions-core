@@ -2,7 +2,7 @@
 
 namespace App\ESolutions\DataTable\Traits;
 
-use App\Exports\GenericReportExport;
+use App\ESolutions\Exports\GenericReportExport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Exception;
