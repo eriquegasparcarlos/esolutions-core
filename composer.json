@@ -1,0 +1,25 @@
+{
+    "name": "esolutions/core",
+    "description": "DataTable, Helpers, Utils y ApiPeruDev compartidos entre proyectos ESolutions",
+    "type": "library",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Carlos Erique Gaspar",
+            "email": "eriquegasparcarlos@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^11.0|^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\ESolutions\\": "src/"
+        },
+        "files": [
+            "src/Helpers/Helpers.php"
+        ]
+    },
+    "minimum-stability": "stable"
+}
