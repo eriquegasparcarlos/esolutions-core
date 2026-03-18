@@ -188,7 +188,7 @@ class Button implements JsonSerializable
     {
         return self::make()
             ->label($label)
-            ->icon('duplicate')
+            ->icon('copy')
             ->action('duplicate')
             ->color('default')
             ->url($url)
@@ -241,20 +241,20 @@ class Button implements JsonSerializable
     /**
      * Botón que cambia el estado activo/inactivo según la fila (row).
      */
-    public static function activeButton($row, ?string $label = null, ?string $url = null, ?string $tooltip = 'Cambiar estado'): self
+    public static function activeButton($row, ?string $label = null, ?string $url = null, ?string $tooltip = null): self
     {
         $isActive = is_array($row) ? ($row['is_active'] ?? false) : ($row->is_active ?? false);
         $icon = $isActive ? 'shield-xmark' : 'shield-check';
         $color = $isActive ? 'red' : 'green';
-        $defaultTooltip = $isActive ? 'Desactivar' : 'Activar';
+        $defaultLabel = $isActive ? 'Desactivar' : 'Activar';
 
         return self::make()
-            ->label($label)
+            ->label($label ?? $defaultLabel)
             ->icon($icon)
             ->action('active')
             ->color($color)
             ->url($url)
-            ->tooltip($tooltip ?? $defaultTooltip);
+            ->tooltip($tooltip ?? $defaultLabel);
     }
 
     public static function separator(): array
