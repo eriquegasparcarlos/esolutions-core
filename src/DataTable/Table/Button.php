@@ -239,6 +239,20 @@ class Button implements JsonSerializable
     }
 
     /**
+     * Botón preconfigurado para ver detalle (con parámetros opcionales).
+     */
+    public static function viewButton(?string $label = 'Ver', ?string $url = null, ?string $tooltip = 'Ver'): self
+    {
+        return self::make()
+            ->label($label)
+            ->icon('eye')
+            ->action('view')
+            ->color('default')
+            ->url($url)
+            ->tooltip($tooltip);
+    }
+
+    /**
      * Botón que cambia el estado activo/inactivo según la fila (row).
      */
     public static function activeButton($row, ?string $label = null, ?string $url = null, ?string $tooltip = null): self
