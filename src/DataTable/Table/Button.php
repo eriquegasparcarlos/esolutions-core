@@ -257,6 +257,24 @@ class Button implements JsonSerializable
             ->tooltip($tooltip ?? $defaultLabel);
     }
 
+    /**
+     * Botón de estado activo/inactivo mostrando solo el icono (sin label).
+     */
+    public static function activeButtonOnlyIcon($row, ?string $url = null, ?string $tooltip = null): self
+    {
+        $isActive = is_array($row) ? ($row['is_active'] ?? false) : ($row->is_active ?? false);
+        $icon = $isActive ? 'shield-xmark' : 'shield-check';
+        $color = $isActive ? 'red' : 'green';
+        $defaultTooltip = $isActive ? 'Desactivar' : 'Activar';
+
+        return self::make()
+            ->icon($icon)
+            ->action('active')
+            ->color($color)
+            ->url($url)
+            ->tooltip($tooltip ?? $defaultTooltip);
+    }
+
     public static function separator(): array
     {
         return ['type' => 'separator'];
