@@ -45,4 +45,24 @@ class Service extends Controller
             return ApiResponse::error($e->getMessage(), $e->getCode() > 0 ? $e->getCode() : 500);
         }
     }
+
+    public static function searchWithInput(string $type, string $number): array
+    {
+        try {
+            $param = $type === 'ruc' ? 'ruc' : 'dni';
+
+            $response = Http::withOptions(['verify' => false])
+                ->withToken(config('configuration.api_token'))
+                ->connectTimeout(5)
+                ->timeout(10)
+                ->post(config('configuration.api_url') . '/' . $type, [
+                    $param => $number,
+                ]);
+
+            return $response->json();
+
+        } catch (Throwable $e) {
+            return ApiResponse::error($e->getMessage(), $e->getCode() > 0 ? $e->getCode() : 500);
+        }
+    }
 }
