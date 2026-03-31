@@ -7,25 +7,24 @@ use JsonSerializable;
 /**
  * CellComponent: Represents an interactive cell rendered as a frontend component
  * (XToggle, XCheckbox, XInput, XSelect, etc.) with an optional action definition.
- *
- * Output contract (array) is consumed by the frontend XCellRenderer:
- * - type_input: 'component'
- * - component: string (e.g. 'XToggle')
- * - modelValue: mixed
- * - props: array
- * - action: array|null
  */
 class CellComponent implements JsonSerializable
 {
-    protected string $component;
-
+    /** @var string */
+    protected $component;
+    /** @var mixed */
     protected $modelValue;
+    /** @var array */
+    protected $props = [];
+    /** @var array|null */
+    protected $action = null;
 
-    protected array $props = [];
-
-    protected ?array $action = null;
-
-    public function __construct(string $component, $modelValue = null, array $props = [])
+    /**
+     * @param string $component
+     * @param mixed $modelValue
+     * @param array $props
+     */
+    public function __construct($component, $modelValue = null, array $props = [])
     {
         $this->component = $component;
         $this->modelValue = $modelValue;
@@ -34,8 +33,13 @@ class CellComponent implements JsonSerializable
 
     /**
      * Generic factory.
+     *
+     * @param string $component
+     * @param mixed $modelValue
+     * @param array $props
+     * @return self
      */
-    public static function make(string $component, $modelValue = null, array $props = []): self
+    public static function make($component, $modelValue = null, array $props = [])
     {
         return new self($component, $modelValue, $props);
     }
@@ -44,25 +48,45 @@ class CellComponent implements JsonSerializable
     // Component shortcuts
     // -------------------------
 
-    public static function toggle(bool $checked, array $props = []): self
+    /**
+     * @param bool $checked
+     * @param array $props
+     * @return self
+     */
+    public static function toggle($checked, array $props = [])
     {
         return self::make('XToggle', $checked, $props);
     }
 
-    public static function checkbox(bool $checked, array $props = []): self
+    /**
+     * @param bool $checked
+     * @param array $props
+     * @return self
+     */
+    public static function checkbox($checked, array $props = [])
     {
         return self::make('XCheckbox', $checked, $props);
     }
 
-    public static function input($value, array $props = []): self
+    /**
+     * @param mixed $value
+     * @param array $props
+     * @return self
+     */
+    public static function input($value, array $props = [])
     {
         return self::make('XInput', $value, $props);
     }
 
-    public static function select($value, array $options, array $props = []): self
+    /**
+     * @param mixed $value
+     * @param array $options
+     * @param array $props
+     * @return self
+     */
+    public static function select($value, array $options, array $props = [])
     {
         $props['options'] = $options;
-
         return self::make('XSelect', $value, $props);
     }
 
@@ -70,24 +94,34 @@ class CellComponent implements JsonSerializable
     // Props
     // -------------------------
 
-    public function modelValue($value): self
+    /**
+     * @param mixed $value
+     * @return self
+     */
+    public function modelValue($value)
     {
         $this->modelValue = $value;
-
         return $this;
     }
 
-    public function prop(string $key, $value): self
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @return self
+     */
+    public function prop($key, $value)
     {
         $this->props[$key] = $value;
-
         return $this;
     }
 
-    public function props(array $props): self
+    /**
+     * @param array $props
+     * @return self
+     */
+    public function props(array $props)
     {
         $this->props = array_merge($this->props, $props);
-
         return $this;
     }
 
@@ -97,15 +131,16 @@ class CellComponent implements JsonSerializable
 
     /**
      * Define a generic API action that should run when the component value changes.
-     * Frontend will replace '{id}' using row.id and replace '$value' with the new value.
+     *
+     * @param string $method
+     * @param string $url
+     * @param array $data
+     * @param bool $refresh
+     * @param bool $optimistic
+     * @return self
      */
-    public function api(
-        string $method,
-        string $url,
-        array $data = [],
-        bool $refresh = true,
-        bool $optimistic = true
-    ): self {
+    public function api($method, $url, array $data = [], $refresh = true, $optimistic = true)
+    {
         $this->action = [
             'type' => 'api',
             'method' => strtolower($method),
@@ -114,28 +149,44 @@ class CellComponent implements JsonSerializable
             'refresh' => $refresh,
             'optimistic' => $optimistic,
         ];
-
         return $this;
     }
 
-    public function apiPatch(string $url, array $data = [], bool $refresh = true, bool $optimistic = true): self
+    /**
+     * @param string $url
+     * @param array $data
+     * @param bool $refresh
+     * @param bool $optimistic
+     * @return self
+     */
+    public function apiPatch($url, array $data = [], $refresh = true, $optimistic = true)
     {
         return $this->api('patch', $url, $data, $refresh, $optimistic);
     }
 
-    public function apiPost(string $url, array $data = [], bool $refresh = true, bool $optimistic = true): self
+    /**
+     * @param string $url
+     * @param array $data
+     * @param bool $refresh
+     * @param bool $optimistic
+     * @return self
+     */
+    public function apiPost($url, array $data = [], $refresh = true, $optimistic = true)
     {
         return $this->api('post', $url, $data, $refresh, $optimistic);
     }
 
     /**
      * Optional confirmation before executing action.
-     * Frontend can show a dialog if present.
+     *
+     * @param string $title
+     * @param string $message
+     * @return self
      */
-    public function confirm(string $title, string $message): self
+    public function confirm($title, $message)
     {
-        if (! $this->action) {
-            $this->action = ['type' => 'api']; // minimal; will be overwritten by api() later if needed
+        if (!$this->action) {
+            $this->action = ['type' => 'api'];
         }
 
         $this->action['confirm'] = [
@@ -147,24 +198,30 @@ class CellComponent implements JsonSerializable
     }
 
     /**
-     * Optional debounce (ms) for inputs/selects (frontend responsibility).
+     * Optional debounce (ms) for inputs/selects.
+     *
+     * @param int $ms
+     * @return self
      */
-    public function debounce(int $ms): self
+    public function debounce($ms)
     {
-        if (! $this->action) {
+        if (!$this->action) {
             $this->action = ['type' => 'api'];
         }
         $this->action['debounce'] = $ms;
-
         return $this;
     }
 
-    public function when(bool $condition, \Closure $cb): self
+    /**
+     * @param bool $condition
+     * @param \Closure $cb
+     * @return self
+     */
+    public function when($condition, \Closure $cb)
     {
         if ($condition) {
             $cb($this);
         }
-
         return $this;
     }
 
@@ -172,7 +229,10 @@ class CellComponent implements JsonSerializable
     // Array / JSON
     // -------------------------
 
-    public function toArray(): array
+    /**
+     * @return array
+     */
+    public function toArray()
     {
         $arr = [
             'type_input' => 'component',
@@ -188,7 +248,10 @@ class CellComponent implements JsonSerializable
         return $arr;
     }
 
-    public function jsonSerialize(): array
+    /**
+     * @return array
+     */
+    public function jsonSerialize()
     {
         return $this->toArray();
     }

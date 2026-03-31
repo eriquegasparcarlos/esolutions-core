@@ -4,7 +4,8 @@ namespace App\ESolutions\Helpers;
 
 class NumberToLetterHelper
 {
-    private static array $UNIDADES = [
+    /** @var array */
+    private static $UNIDADES = [
         '',
         'un ',
         'dos ',
@@ -28,8 +29,9 @@ class NumberToLetterHelper
         'veinte ',
     ];
 
-    private static array $DECENAS = [
-        'veinti',   // 20-29 (se concatena)
+    /** @var array */
+    private static $DECENAS = [
+        'veinti',
         'treinta ',
         'cuarenta ',
         'cincuenta ',
@@ -39,7 +41,8 @@ class NumberToLetterHelper
         'noventa ',
     ];
 
-    private static array $CENTENAS = [
+    /** @var array */
+    private static $CENTENAS = [
         'ciento ',
         'doscientos ',
         'trescientos ',
@@ -51,7 +54,13 @@ class NumberToLetterHelper
         'novecientos ',
     ];
 
-    public static function convertToLetter($number, string $currency = '', bool $format = false): string
+    /**
+     * @param mixed $number
+     * @param string $currency
+     * @param bool $format
+     * @return string
+     */
+    public static function convertToLetter($number, $currency = '', $format = false)
     {
         $normalized = self::normalizeNumber($number);
         if ($normalized === null) {
@@ -60,10 +69,12 @@ class NumberToLetterHelper
 
         // Aseguramos 2 decimales exactos
         $normalized = sprintf('%.2f', $normalized);
-        [$intStr, $decStr] = explode('.', $normalized);
+        $parts = explode('.', $normalized);
+        $intStr = $parts[0];
+        $decStr = $parts[1];
 
         $base_number = (int)$intStr;
-        $decNumberStr = $decStr; // siempre 2 dígitos
+        $decNumberStr = $decStr;
 
         if (($base_number < 0) || ($base_number > 999999999)) {
             return 'No es posible convertir el numero en letras';
@@ -93,7 +104,6 @@ class NumberToLetterHelper
         }
 
         if ((int)$cientos > 0) {
-            // ✅ Fix: 1001 => "mil uno" (no "mil un")
             if ($cientos === '001') {
                 $converted .= ((int)$millones > 0 || (int)$miles > 0) ? 'uno ' : 'un ';
             } else {
@@ -109,18 +119,20 @@ class NumberToLetterHelper
         $converted = preg_replace('/\s+/', ' ', trim($converted)) . ' ';
 
         if ($format) {
-            // Formato: 1.234,56 (Texto 56/100 MONEDA)
             $valor_convertido = number_format((float)$normalized, 2, ',', '.') .
                 ' (' . ucfirst($converted) . $decNumberStr . '/100 ' . $currency . ')';
         } else {
-            // Formato: Texto con 56/100 MONEDA
             $valor_convertido = ucfirst($converted) . 'con ' . $decNumberStr . '/100 ' . $currency;
         }
 
         return trim($valor_convertido);
     }
 
-    private static function convertGroup(string $n): string
+    /**
+     * @param string $n
+     * @return string
+     */
+    private static function convertGroup($n)
     {
         $output = '';
 
@@ -132,7 +144,7 @@ class NumberToLetterHelper
             $output = self::$CENTENAS[((int)$n[0]) - 1];
         }
 
-        $k = (int)substr($n, 1); // 0..99
+        $k = (int)substr($n, 1);
 
         if ($k <= 20) {
             $output .= self::$UNIDADES[$k];
@@ -140,8 +152,8 @@ class NumberToLetterHelper
         }
 
         // 21..99
-        $tens = (int)$n[1];  // 2..9
-        $unit = (int)$n[2];  // 0..9
+        $tens = (int)$n[1];
+        $unit = (int)$n[2];
 
         $decena = self::$DECENAS[$tens - 2];
 
@@ -160,8 +172,11 @@ class NumberToLetterHelper
      * - "1,234.56"
      * - "1.234,56"
      * - "1234,56"
+     *
+     * @param mixed $value
+     * @return float|null
      */
-    private static function normalizeNumber($value): ?float
+    private static function normalizeNumber($value)
     {
         if (is_int($value) || is_float($value)) {
             return (float)$value;
@@ -177,8 +192,8 @@ class NumberToLetterHelper
         // Quitar espacios
         $v = str_replace(' ', '', $v);
 
-        $hasDot = str_contains($v, '.');
-        $hasComma = str_contains($v, ',');
+        $hasDot = strpos($v, '.') !== false;
+        $hasComma = strpos($v, ',') !== false;
 
         // Caso "1.234,56" => "." miles, "," decimal
         if ($hasDot && $hasComma) {
@@ -189,13 +204,11 @@ class NumberToLetterHelper
                 $v = str_replace('.', '', $v);
                 $v = str_replace(',', '.', $v);
             } else {
-                // Caso "1,234.56" => "," miles, "." decimal
                 $v = str_replace(',', '', $v);
             }
         } elseif ($hasComma && !$hasDot) {
-            // "1234,56" => decimal con coma
             $v = str_replace(',', '.', $v);
-        } // else: ya viene con punto o sin separadores
+        }
 
         if (!is_numeric($v)) return null;
 

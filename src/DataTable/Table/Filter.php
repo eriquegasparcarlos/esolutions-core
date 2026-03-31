@@ -7,197 +7,297 @@ namespace App\ESolutions\DataTable\Table;
  */
 class Filter implements \JsonSerializable
 {
-    protected ?string $label = null;
-
-    protected ?string $name = null;
-
-    protected ?string $type = null;
-
-    protected ?array $options = null;
-
-    protected ?string $default = null;
-
+    /** @var string|null */
+    protected $label = null;
+    /** @var string|null */
+    protected $name = null;
+    /** @var string|null */
+    protected $type = null;
+    /** @var array|null */
+    protected $options = null;
+    /** @var string|null */
+    protected $default = null;
     /** @var mixed */
     public $value = null;
-
-    protected bool $includeAllOption = false;
-
-    protected ?string $class = null;
-
-    protected string $dateStart = '';
-
-    protected string $dateEnd = '';
-
-    protected string $monthStart = '';
-
-    protected string $monthEnd = '';
-
-    protected bool $filterLocal = false;
+    /** @var bool */
+    protected $includeAllOption = false;
+    /** @var string|null */
+    protected $class = null;
+    /** @var string */
+    protected $dateStart = '';
+    /** @var string */
+    protected $dateEnd = '';
+    /** @var string */
+    protected $monthStart = '';
+    /** @var string */
+    protected $monthEnd = '';
+    /** @var bool */
+    protected $filterLocal = false;
 
     // --- XTreeSelect ---
-    protected bool $withFilter = false;
+    /** @var bool */
+    protected $withFilter = false;
+    /** @var bool */
+    protected $multiple = false;
+    /** @var bool */
+    protected $onlyLeafSelectable = false;
+    /** @var string */
+    protected $optionValue = 'id';
+    /** @var string */
+    protected $optionLabel = 'label';
+    /** @var string */
+    protected $optionChildren = 'children';
 
-    protected bool $multiple = false;
-
-    protected bool $onlyLeafSelectable = false;
-
-    protected string $optionValue = 'id';
-
-    protected string $optionLabel = 'label';
-
-    protected string $optionChildren = 'children';
-
-    protected ?string $dependsOn = null;     // nombre del padre (ej: company_id)
-
-    protected ?array $remote = null;         // { url, method, params }
-
-    protected bool $resetOnParentChange = true;
-
-    protected bool $disableWhenParentEmpty = true;
+    /** @var string|null */
+    protected $dependsOn = null;
+    /** @var array|null */
+    protected $remote = null;
+    /** @var bool */
+    protected $resetOnParentChange = true;
+    /** @var bool */
+    protected $disableWhenParentEmpty = true;
+    /** @var bool */
+    protected $clearable = false;
+    /** @var bool */
+    protected $filterable = false;
+    /** @var string|null */
+    protected $searchUrl = null;
 
     protected function __construct() {}
 
-    public static function make(string $name): self
+    /**
+     * @param string $name
+     * @return self
+     */
+    public static function make($name)
     {
-        $instance = new self;
+        $instance = new self();
         $instance->name = $name;
-
         return $instance;
     }
 
-    public function label(string $label): self
+    /**
+     * @param string $label
+     * @return self
+     */
+    public function label($label)
     {
         $this->label = $label;
-
         return $this;
     }
 
-    public function type(string $type): self
+    /**
+     * @param string $type
+     * @return self
+     */
+    public function type($type)
     {
         $this->type = $type;
-
         return $this;
     }
 
-    public function options(array $options): self
+    /**
+     * @param array $options
+     * @return self
+     */
+    public function options(array $options)
     {
         $this->options = $options;
-
         return $this;
     }
 
-    public function default(?string $default): self
+    /**
+     * @param string|null $default
+     * @return self
+     */
+    public function default($default)
     {
         $this->default = $default;
-
         return $this;
     }
 
-    public function value(mixed $value): self
+    /**
+     * @param mixed $value
+     * @return self
+     */
+    public function value($value)
     {
         $this->value = $value;
-
         return $this;
     }
 
-    public function dateStart(string $dateStart): self
+    /**
+     * @param string $dateStart
+     * @return self
+     */
+    public function dateStart($dateStart)
     {
         $this->dateStart = $dateStart;
-
         return $this;
     }
 
-    public function dateEnd(string $dateEnd): self
+    /**
+     * @param string $dateEnd
+     * @return self
+     */
+    public function dateEnd($dateEnd)
     {
         $this->dateEnd = $dateEnd;
-
         return $this;
     }
 
-    public function monthStart(string $monthStart): self
+    /**
+     * @param string $monthStart
+     * @return self
+     */
+    public function monthStart($monthStart)
     {
         $this->monthStart = $monthStart;
-
         return $this;
     }
 
-    public function monthEnd(string $monthEnd): self
+    /**
+     * @param string $monthEnd
+     * @return self
+     */
+    public function monthEnd($monthEnd)
     {
         $this->monthEnd = $monthEnd;
-
         return $this;
     }
 
-    public function includeAllOption(bool $include = true): self
+    /**
+     * @param bool $include
+     * @return self
+     */
+    public function includeAllOption($include = true)
     {
         $this->includeAllOption = $include;
         if ($include && in_array($this->type, ['select', 'tree-select'], true)) {
             $this->value = 'all';
         }
-
         return $this;
     }
 
-    public function filterLocal(bool $filterLocal = false): self
+    /**
+     * @param bool $filterLocal
+     * @return self
+     */
+    public function filterLocal($filterLocal = false)
     {
         $this->filterLocal = $filterLocal;
-
         return $this;
     }
 
     // -------------------------
     // XTreeSelect helpers
     // -------------------------
-    public function withFilter(bool $v = true): self
+
+    /**
+     * @param bool $v
+     * @return self
+     */
+    public function withFilter($v = true)
     {
         $this->withFilter = $v;
-
         return $this;
     }
 
-    public function multiple(bool $v = true): self
+    /**
+     * @param bool $v
+     * @return self
+     */
+    public function multiple($v = true)
     {
         $this->multiple = $v;
-
         return $this;
     }
 
-    public function onlyLeafSelectable(bool $v = true): self
+    /**
+     * @param bool $v
+     * @return self
+     */
+    public function onlyLeafSelectable($v = true)
     {
         $this->onlyLeafSelectable = $v;
-
         return $this;
     }
 
-    public function optionValue(string $key): self
+    /**
+     * @param string $key
+     * @return self
+     */
+    public function optionValue($key)
     {
         $this->optionValue = $key;
-
         return $this;
     }
 
-    public function optionLabel(string $key): self
+    /**
+     * @param string $key
+     * @return self
+     */
+    public function optionLabel($key)
     {
         $this->optionLabel = $key;
-
         return $this;
     }
 
-    public function optionChildren(string $key): self
+    /**
+     * @param string $key
+     * @return self
+     */
+    public function optionChildren($key)
     {
         $this->optionChildren = $key;
-
         return $this;
     }
 
-    public function cssClass(string $class): self
+    /**
+     * @param bool $v
+     * @return self
+     */
+    public function clearable($v = true)
+    {
+        $this->clearable = $v;
+        return $this;
+    }
+
+    /**
+     * @param bool $v
+     * @return self
+     */
+    public function filterable($v = true)
+    {
+        $this->filterable = $v;
+        return $this;
+    }
+
+    /**
+     * @param string $url
+     * @return self
+     */
+    public function searchUrl($url)
+    {
+        $this->searchUrl = $url;
+        $this->filterable = true;
+        return $this;
+    }
+
+    /**
+     * @param string $class
+     * @return self
+     */
+    public function cssClass($class)
     {
         $this->class = $class;
-
         return $this;
     }
 
-    public function toArray(): array
+    /**
+     * @return array
+     */
+    public function toArray()
     {
         $options = $this->options;
 
@@ -210,7 +310,7 @@ class Filter implements \JsonSerializable
                     $this->optionLabel => __('all'),
                     $this->optionChildren => is_array($options) ? $options : [],
                     'selectable' => true,
-                ],
+                ]
             ];
         }
 
@@ -237,6 +337,9 @@ class Filter implements \JsonSerializable
             'optionLabel' => $this->optionLabel,
             'optionChildren' => $this->optionChildren,
 
+            'clearable' => $this->clearable,
+            'filterable' => $this->filterable,
+            'searchUrl' => $this->searchUrl,
             'dependsOn' => $this->dependsOn,
             'remote' => $this->remote,
             'resetOnParentChange' => $this->resetOnParentChange,
@@ -244,12 +347,21 @@ class Filter implements \JsonSerializable
         ];
     }
 
-    public function jsonSerialize(): array
+    /**
+     * @return array
+     */
+    public function jsonSerialize()
     {
         return $this->toArray();
     }
 
-    public static function makeInput(string $name, string $label = '', string $class = 'col-6'): self
+    /**
+     * @param string $name
+     * @param string $label
+     * @param string $class
+     * @return self
+     */
+    public static function makeInput($name, $label = '', $class = 'col-6')
     {
         return self::make($name)
             ->label($label)
@@ -258,12 +370,20 @@ class Filter implements \JsonSerializable
             ->cssClass($class);
     }
 
-    public static function makeSelect(string $name, string $label = '', array $options = [], string $class = 'col-6'): self
+    /**
+     * @param string $name
+     * @param string $label
+     * @param array $options
+     * @param string $class
+     * @return self
+     */
+    public static function makeSelect($name, $label = '', array $options = [], $class = 'col-6')
     {
         return self::make($name)
             ->label($label)
             ->type('select')
             ->options($options)
+            ->optionLabel('name')
             ->default('all')
             ->includeAllOption()
             ->cssClass($class);
@@ -271,8 +391,14 @@ class Filter implements \JsonSerializable
 
     /**
      * Filtro predefinido tipo tree-select (XTreeSelect).
+     *
+     * @param string $name
+     * @param string $label
+     * @param array $options
+     * @param string $class
+     * @return self
      */
-    public static function makeTreeSelect(string $name, string $label = '', array $options = [], string $class = 'col-6'): self
+    public static function makeTreeSelect($name, $label = '', array $options = [], $class = 'col-6')
     {
         return self::make($name)
             ->label($label)
@@ -284,7 +410,34 @@ class Filter implements \JsonSerializable
             ->cssClass($class);
     }
 
-    public static function makePeriod(string $name = 'period', ?string $label = null): self
+    /**
+     * Filtro select con búsqueda remota al backend.
+     *
+     * @param string $name
+     * @param string $label
+     * @param string $url
+     * @param string $class
+     * @return self
+     */
+    public static function makeSearch($name, $label, $url, $class = 'col-6')
+    {
+        return self::make($name)
+            ->label($label)
+            ->type('select')
+            ->options([])
+            ->optionValue('id')
+            ->optionLabel('name')
+            ->searchUrl($url)
+            ->clearable()
+            ->cssClass($class);
+    }
+
+    /**
+     * @param string $name
+     * @param string|null $label
+     * @return self
+     */
+    public static function makePeriod($name = 'period', $label = null, $class = 'col-24')
     {
         $periodOptions = [
             ['id' => 'month', 'name' => __('by month')],
@@ -293,8 +446,8 @@ class Filter implements \JsonSerializable
             ['id' => 'between_dates', 'name' => __('between date')],
         ];
 
-        return self::make($name)
-            ->label($label ?? __('period'))
+        $instance = self::make($name)
+            ->label($label !== null ? $label : __('period'))
             ->type('date')
             ->options($periodOptions)
             ->value('month')
@@ -302,37 +455,57 @@ class Filter implements \JsonSerializable
             ->dateEnd(date('Y-m-d'))
             ->monthStart(date('Y-m'))
             ->monthEnd(date('Y-m'));
+
+        if ($class) {
+            $instance->cssClass($class);
+        }
+
+        return $instance;
     }
 
-    public function dependsOn(string $parentName): self
+    /**
+     * @param string $parentName
+     * @return self
+     */
+    public function dependsOn($parentName)
     {
         $this->dependsOn = $parentName;
-
         return $this;
     }
 
-    public function remoteOptions(string $url, string $method = 'get', array $params = []): self
+    /**
+     * @param string $url
+     * @param string $method
+     * @param array $params
+     * @return self
+     */
+    public function remoteOptions($url, $method = 'get', array $params = [])
     {
         $this->remote = [
             'url' => $url,
             'method' => strtolower($method),
             'params' => $params,
         ];
-
         return $this;
     }
 
-    public function resetOnParentChange(bool $v = true): self
+    /**
+     * @param bool $v
+     * @return self
+     */
+    public function resetOnParentChange($v = true)
     {
         $this->resetOnParentChange = $v;
-
         return $this;
     }
 
-    public function disableWhenParentEmpty(bool $v = true): self
+    /**
+     * @param bool $v
+     * @return self
+     */
+    public function disableWhenParentEmpty($v = true)
     {
         $this->disableWhenParentEmpty = $v;
-
         return $this;
     }
 }

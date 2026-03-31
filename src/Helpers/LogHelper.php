@@ -10,25 +10,29 @@ if (!function_exists('logUserException')) {
      * @param Request|null $request
      * @return void
      */
-    function logUserException(Throwable $e, Request $request = null): void
+    function logUserException(Throwable $e, Request $request = null)
     {
         $request = $request ?: request();
         $user = auth()->user();
-        $userId = $user?->id ?? 'guest';
+        $userId = $user ? $user->id : 'guest';
 
         // IP real intentando respetar proxies/CDN si TrustProxies está bien configurado
-        $clientIp = $request->ip(); // respeta Trusted Proxies
+        $clientIp = $request->ip();
         $xff = $request->header('X-Forwarded-For');
         $forwardedIps = $xff ? array_map('trim', explode(',', $xff)) : [];
 
         // En entornos con Cloudflare / Nginx pueden venir estos headers
-        $realIp = $request->header('CF-Connecting-IP')
-            ?? $request->header('X-Real-IP')
-            ?? ($forwardedIps[0] ?? $clientIp);
+        $realIp = $request->header('CF-Connecting-IP');
+        if ($realIp === null) {
+            $realIp = $request->header('X-Real-IP');
+        }
+        if ($realIp === null) {
+            $realIp = isset($forwardedIps[0]) ? $forwardedIps[0] : $clientIp;
+        }
 
         // Dominio/host que usó el cliente para llegar al API
-        $host = $request->getHost();                // ejemplo: api.tu-dominio.com
-        $httpHost = $request->getSchemeAndHttpHost(); // ejemplo: https://api.tu-dominio.com
+        $host = $request->getHost();
+        $httpHost = $request->getSchemeAndHttpHost();
 
         $logEntry = [
             'timestamp' => now()->toDateTimeString(),
@@ -39,9 +43,9 @@ if (!function_exists('logUserException')) {
             'method'    => $request->method(),
             'input'     => $request->all(),
             'user_id'   => $userId,
-            'user_email'=> $user?->email,
+            'user_email'=> $user ? $user->email : null,
             'ip'         => $realIp,
-            'ip_chain'   => $forwardedIps,           // toda la cadena de proxies (si existe)
+            'ip_chain'   => $forwardedIps,
             'user_agent' => $request->userAgent(),
             'host'       => $host,
             'http_host'  => $httpHost,
@@ -50,7 +54,10 @@ if (!function_exists('logUserException')) {
         ];
 
         $filename = storage_path("logs/user-{$userId}.log");
-        File::ensureDirectoryExists(dirname($filename));
+        $dir = dirname($filename);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
         file_put_contents($filename, json_encode($logEntry) . PHP_EOL, FILE_APPEND);
     }
 }

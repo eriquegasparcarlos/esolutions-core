@@ -2,7 +2,8 @@
 
 namespace App\ESolutions\WhatsAppApi;
 
-use Illuminate\Support\Facades\Http;
+use App\Models\System\Configuration;
+use GuzzleHttp\Client;
 use Throwable;
 
 class Service
@@ -10,19 +11,35 @@ class Service
     /**
      * Enviar PDF por WhatsApp.
      * Usa el endpoint /message/send/pdf (auto-selecciona la primera sesión conectada).
+     *
+     * @param string $base64Pdf  Contenido del PDF codificado en base64
+     * @param string $number     Número de teléfono con código de país (ej: 51999999999)
+     * @param string $message    Mensaje que acompaña al PDF
+     * @param string $filename   Nombre del archivo (ej: factura-001.pdf)
+     * @return array
      */
-    public static function sendPdf(string $base64Pdf, string $number, string $message = '', string $filename = 'document.pdf'): array
+    public static function sendPdf($base64Pdf, $number, $message = '', $filename = 'document.pdf')
     {
         try {
-            $response = self::http(30)
-                ->post(self::url('/message/send/pdf'), [
+            $config = self::getConfig();
+
+            $client = new Client([
+                'verify' => false,
+                'connect_timeout' => 5,
+                'timeout' => 30,
+            ]);
+
+            $response = $client->post($config['url'] . '/message/send/pdf', [
+                'headers' => self::buildHeaders($config['token']),
+                'json' => [
                     'file' => $base64Pdf,
                     'number' => $number,
                     'message' => $message,
                     'filename' => $filename,
-                ]);
+                ],
+            ]);
 
-            return $response->json();
+            return json_decode($response->getBody()->getContents(), true);
 
         } catch (Throwable $e) {
             return ['success' => false, 'message' => $e->getMessage()];
@@ -31,18 +48,33 @@ class Service
 
     /**
      * Enviar mensaje de texto.
+     *
+     * @param string $sessionId
+     * @param string $to       Número con código de país
+     * @param string $text
+     * @return array
      */
-    public static function sendText(string $sessionId, string $to, string $text): array
+    public static function sendText($sessionId, $to, $text)
     {
         try {
-            $response = self::http()
-                ->post(self::url('/messages/send/text'), [
+            $config = self::getConfig();
+
+            $client = new Client([
+                'verify' => false,
+                'connect_timeout' => 5,
+                'timeout' => 15,
+            ]);
+
+            $response = $client->post($config['url'] . '/messages/send/text', [
+                'headers' => self::buildHeaders($config['token']),
+                'json' => [
                     'sessionId' => $sessionId,
                     'to' => $to,
                     'text' => $text,
-                ]);
+                ],
+            ]);
 
-            return $response->json();
+            return json_decode($response->getBody()->getContents(), true);
 
         } catch (Throwable $e) {
             return ['success' => false, 'message' => $e->getMessage()];
@@ -51,14 +83,25 @@ class Service
 
     /**
      * Listar sesiones.
+     *
+     * @return array
      */
-    public static function getSessions(): array
+    public static function getSessions()
     {
         try {
-            $response = self::http()
-                ->get(self::url('/sessions'));
+            $config = self::getConfig();
 
-            return $response->json();
+            $client = new Client([
+                'verify' => false,
+                'connect_timeout' => 5,
+                'timeout' => 10,
+            ]);
+
+            $response = $client->get($config['url'] . '/sessions', [
+                'headers' => self::buildHeaders($config['token']),
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
 
         } catch (Throwable $e) {
             return ['success' => false, 'message' => $e->getMessage()];
@@ -67,14 +110,26 @@ class Service
 
     /**
      * Estado de una sesión.
+     *
+     * @param string $sessionId
+     * @return array
      */
-    public static function getSessionStatus(string $sessionId): array
+    public static function getSessionStatus($sessionId)
     {
         try {
-            $response = self::http()
-                ->get(self::url('/sessions/' . $sessionId . '/status'));
+            $config = self::getConfig();
 
-            return $response->json();
+            $client = new Client([
+                'verify' => false,
+                'connect_timeout' => 5,
+                'timeout' => 10,
+            ]);
+
+            $response = $client->get($config['url'] . '/sessions/' . $sessionId . '/status', [
+                'headers' => self::buildHeaders($config['token']),
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
 
         } catch (Throwable $e) {
             return ['success' => false, 'message' => $e->getMessage()];
@@ -83,14 +138,26 @@ class Service
 
     /**
      * Estado de entrega de un mensaje.
+     *
+     * @param string $messageId
+     * @return array
      */
-    public static function getMessageStatus(string $messageId): array
+    public static function getMessageStatus($messageId)
     {
         try {
-            $response = self::http()
-                ->get(self::url('/messages/' . $messageId . '/status'));
+            $config = self::getConfig();
 
-            return $response->json();
+            $client = new Client([
+                'verify' => false,
+                'connect_timeout' => 5,
+                'timeout' => 10,
+            ]);
+
+            $response = $client->get($config['url'] . '/messages/' . $messageId . '/status', [
+                'headers' => self::buildHeaders($config['token']),
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
 
         } catch (Throwable $e) {
             return ['success' => false, 'message' => $e->getMessage()];
@@ -100,20 +167,43 @@ class Service
 
     // ===== Helpers =====
 
-    private static function http(int $timeout = 15): \Illuminate\Http\Client\PendingRequest
+    /**
+     * Obtener URL y token desde la configuración system.
+     *
+     * @return array ['url' => string, 'token' => string]
+     * @throws \RuntimeException
+     */
+    private static function getConfig()
     {
-        return Http::withOptions(['verify' => false])
-            ->withHeaders([
-                'x-api-key' => config('configuration.ws_api_token'),
-                'x-app-version' => config('version.version', ''),
-                'x-app-build' => config('version.build', ''),
-            ])
-            ->connectTimeout(5)
-            ->timeout($timeout);
+        $config = Configuration::query()
+            ->select('api_integration_url', 'api_integration_token')
+            ->first();
+
+        $url = $config->api_integration_url ?? '';
+        $token = $config->api_integration_token ?? '';
+
+        if ($url === '' || $token === '') {
+            throw new \RuntimeException('La URL o el token de integración WhatsApp no están configurados.');
+        }
+
+        return [
+            'url' => rtrim($url, '/'),
+            'token' => $token,
+        ];
     }
 
-    private static function url(string $path): string
+    /**
+     * @param string $token
+     * @return array
+     */
+    private static function buildHeaders($token)
     {
-        return rtrim(config('configuration.ws_api_url', ''), '/') . $path;
+        return [
+            'x-api-key' => $token,
+            'x-app-version' => config('version.version', ''),
+            'x-app-build' => config('version.build', ''),
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ];
     }
 }

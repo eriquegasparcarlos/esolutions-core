@@ -1,7 +1,7 @@
 {
     "name": "esolutions/core",
-    "version": "1.0.0",
-    "description": "DataTable, Helpers, Utils y ApiPeruDev compartidos entre proyectos ESolutions",
+    "version": "0.1.0",
+    "description": "DataTable, Helpers, Utils, ApiPeruDev y WhatsAppApi compartidos entre proyectos ESolutions (legacy PHP 7.2+)",
     "type": "library",
     "license": "proprietary",
     "authors": [
@@ -11,8 +11,9 @@
         }
     ],
     "require": {
-        "php": "^8.2",
-        "laravel/framework": "^11.0|^12.0"
+        "php": "^7.2 || ^8.0",
+        "laravel/framework": "^5.7 || ^6.0 || ^7.0 || ^8.0 || ^9.0 || ^10.0",
+        "guzzlehttp/guzzle": "^6.0 || ^7.0"
     },
     "autoload": {
         "psr-4": {

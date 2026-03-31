@@ -13,20 +13,21 @@ trait ExcelTrait
     /**
      * Exporta a Excel cualquier colección de datos formateada por un Resource y columnas configuradas.
      *
-     * @param  string  $resource  Nombre de la Collection Resource (ej: CompanyCollection::class).
-     * @param  string  $filename  Nombre del archivo a descargar.
-     * @param  string  $title  Título grande del reporte.
-     * @param  array  $exclude  Columnas a excluir (por defecto ['actions']).
-     * @return BinaryFileResponse Archivo Excel descargable.
-     *
+     * @param Request $request
+     * @param string $resource Nombre de la Collection Resource (ej: CompanyCollection::class).
+     * @param string $filename Nombre del archivo a descargar.
+     * @param string $title Título grande del reporte.
+     * @param array $exclude Columnas a excluir (por defecto ['actions']).
+     * @return BinaryFileResponse     Archivo Excel descargable.
      * @throws Exception
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
-    public function exportRecordsGeneric(Request $request, string $resource, string $filename = 'reporte.xlsx',
-        string $title = 'Reporte', array $exclude = ['actions'])
+    public function exportRecordsGeneric(Request $request, $resource, $filename = 'reporte.xlsx',
+                                         $title = 'Reporte', array $exclude = ['actions'])
     {
         $filters = $request->input('filters', []);
-        $this->sortBy = $request->input('sortBy');
+        $this->columns = $this->getColumns();
+        $this->sortBy = $this->resolveSortField($request->input('sortBy'));
         $this->descending = $request->input('descending');
         $this->direction = $this->descending ? 'desc' : 'asc';
 
@@ -37,7 +38,9 @@ trait ExcelTrait
         $records = collect((new $resource($query->get()))->jsonSerialize());
 
         // 2. Filtra columnas a mostrar
-        $filteredColumns = array_filter($columns, fn ($c) => ! in_array($c['name'], $exclude));
+        $filteredColumns = array_filter($columns, function ($c) use ($exclude) {
+            return !in_array($c['name'], $exclude);
+        });
         $fields = array_column($filteredColumns, 'name');
         $headers = array_column($filteredColumns, 'label');
 
@@ -51,38 +54,28 @@ trait ExcelTrait
                 if (is_array($r) && isset($r['type_input'])) {
                     switch ($r['type_input']) {
                         case 'multi_line':
-                            // Junta las líneas con \n
-                            $row[] = is_array($r['value']) ? implode("\n", $r['value']) : (string) $r['value'];
+                            $row[] = is_array($r['value']) ? implode("\n", $r['value']) : (string)$r['value'];
                             break;
 
                         case 'composite':
-                            // Para composite, recorre cada línea y cada elemento de esa línea
                             $flatLines = [];
                             foreach ($r['lines'] as $line) {
                                 $lineParts = [];
                                 foreach ($line as $part) {
                                     if (is_array($part)) {
-                                        // Si es texto
                                         if ($part['type_input'] === 'text') {
                                             $lineParts[] = $part['value'];
-                                        }
-                                        // Si es badge/chip, puedes mostrar solo el label o label + value
-                                        elseif (in_array($part['type_input'], ['badge', 'chip'])) {
+                                        } elseif (in_array($part['type_input'], ['badge', 'chip'])) {
                                             $lineParts[] = $part['label'];
-                                        }
-                                        // Si es link, mostrar solo el texto o el URL, según desees
-                                        elseif ($part['type_input'] === 'link') {
-                                            $lineParts[] = $part['label'].' ('.$part['url'].')';
-                                        }
-                                        // Si es icon/avatar/switch, usualmente puedes omitir o poner un texto indicativo
-                                        elseif ($part['type_input'] === 'icon') {
+                                        } elseif ($part['type_input'] === 'link') {
+                                            $lineParts[] = $part['label'] . ' (' . $part['url'] . ')';
+                                        } elseif ($part['type_input'] === 'icon') {
                                             $lineParts[] = '[icon]';
                                         } elseif ($part['type_input'] === 'avatar') {
                                             $lineParts[] = '[avatar]';
                                         } elseif ($part['type_input'] === 'switch') {
                                             $lineParts[] = $part['checked'] ? 'Sí' : 'No';
                                         }
-                                        // Otras tipos: agregar lo que necesites
                                     }
                                 }
                                 $flatLines[] = implode(' ', $lineParts);
@@ -91,7 +84,6 @@ trait ExcelTrait
                             break;
 
                         case 'html':
-                            // Quita <br> y reemplaza por salto de línea
                             $row[] = preg_replace('/<br\s*\/?>/i', "\n", $r['label']);
                             break;
 
@@ -105,23 +97,21 @@ trait ExcelTrait
                             break;
 
                         case 'link':
-                            $row[] = $r['label'].' ('.$r['url'].')';
+                            $row[] = $r['label'] . ' (' . $r['url'] . ')';
                             break;
 
                         case 'icon':
                         case 'avatar':
                         case 'switch':
-                            // Puedes omitirlos o poner algo indicativo
                             $row[] = '';
                             break;
 
                         default:
-                            $row[] = ''; // Si es un tipo desconocido
+                            $row[] = '';
                     }
                 }
                 // 2. Si es string plano
                 elseif (is_string($r)) {
-                    // Convierte <br> a salto de línea (por compatibilidad)
                     $row[] = preg_replace('/<br\s*\/?>/i', "\n", $r);
                 }
                 // 3. Si es null o vacío
@@ -134,18 +124,15 @@ trait ExcelTrait
                 }
             }
 
-            // Garantiza el mismo número de columnas que los headers
             if (count($row) < count($fields)) {
                 $row = array_pad($row, count($fields), '');
             }
-
             return $row;
         })->toArray();
 
         // 4. Exporta usando el Export genérico
         $response = Excel::download(new GenericReportExport($data, $headers, $title), $filename);
         $response->headers->set('Access-Control-Expose-Headers', 'Content-Disposition');
-
         return $response;
     }
 }

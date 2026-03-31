@@ -2,70 +2,217 @@
 
 namespace App\ESolutions\ApiPeruDev;
 
-use App\ESolutions\Utils\ApiResponse;
-use App\Http\Controllers\Controller;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Throwable;
 
-class Service extends Controller
+class Service
 {
-    public function searchRuc(Request $request)
+    /**
+     * @param Request $request
+     * @return mixed
+     */
+    public static function searchRuc(Request $request)
+    {
+        return self::searchWithInput('ruc', $request->input('number'));
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     */
+    public static function searchDni(Request $request)
+    {
+        return self::searchWithInput('dni', $request->input('number'));
+    }
+
+    /**
+     * @param string $type
+     * @param string $number
+     * @return mixed
+     */
+    public static function searchWithInput($type, $number)
     {
         try {
-            $response = self::baseRequest()
-                ->post(config('configuration.api_url') . '/ruc', [
-                    'ruc' => $request->input('number'),
-                ]);
+            $client = new Client([
+                'verify' => false,
+                'connect_timeout' => 3,
+                'timeout' => 5,
+            ]);
 
-            return $response->json();
+            $response = $client->post(config('configuration.api_url') . "/api/$type", [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
+                    'x-app-version' => config('version.version', ''),
+                    'x-app-build' => config('version.build', ''),
+                    'Accept' => 'application/json',
+                ],
+                'json' => [
+                    $type => $number,
+                ],
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
 
         } catch (Throwable $e) {
-            return ApiResponse::error($e->getMessage(), $e->getCode() > 0 ? $e->getCode() : 500);
+            return ['success' => false, 'message' => $e->getMessage()];
         }
     }
 
-    public function searchDni(Request $request)
+    /**
+     * @param Request $request
+     * @return mixed
+     */
+    public static function searchExchangeRateSale(Request $request)
+    {
+        return self::searchExchangeRateSaleWithInput($request->input('date'));
+    }
+
+    /**
+     * Consulta CPE (Comprobante de Pago Electrónico) en SUNAT.
+     *
+     * @param Request $request
+     * @return mixed
+     */
+    public static function searchCpe(Request $request)
+    {
+        return self::searchCpeWithInput(
+            $request->input('ruc_emisor'),
+            $request->input('codigo_tipo_documento'),
+            $request->input('serie_documento'),
+            $request->input('numero_documento'),
+            $request->input('fecha_de_emision'),
+            $request->input('total')
+        );
+    }
+
+    /**
+     * @param string $rucEmisor
+     * @param string $codigoTipoDocumento
+     * @param string $serieDocumento
+     * @param string $numeroDocumento
+     * @param string $fechaDeEmision  formato yyyy-mm-dd
+     * @param string|float $total
+     * @return mixed
+     */
+    public static function searchCpeWithInput($rucEmisor, $codigoTipoDocumento, $serieDocumento, $numeroDocumento, $fechaDeEmision, $total)
     {
         try {
-            $response = self::baseRequest()
-                ->post(config('configuration.api_url') . '/dni', [
-                    'dni' => $request->input('number'),
-                ]);
+            $client = new Client([
+                'verify' => false,
+                'connect_timeout' => 3,
+                'timeout' => 10,
+            ]);
 
-            return $response->json();
+            $response = $client->post(config('configuration.api_url') . '/api/cpe', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
+                    'x-app-version' => config('version.version', ''),
+                    'x-app-build' => config('version.build', ''),
+                    'Accept' => 'application/json',
+                ],
+                'json' => [
+                    'ruc_emisor' => $rucEmisor,
+                    'codigo_tipo_documento' => $codigoTipoDocumento,
+                    'serie_documento' => $serieDocumento,
+                    'numero_documento' => $numeroDocumento,
+                    'fecha_de_emision' => $fechaDeEmision,
+                    'total' => $total,
+                ],
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
 
         } catch (Throwable $e) {
-            return ApiResponse::error($e->getMessage(), $e->getCode() > 0 ? $e->getCode() : 500);
+            return ['success' => false, 'message' => $e->getMessage()];
         }
     }
 
-    public static function searchWithInput(string $type, string $number): array
+    /**
+     * Consulta CPE múltiple v2 contra SUNAT.
+     * Máximo 100 comprobantes por lote.
+     *
+     * @param array $comprobantes Array de strings con formato "RUC|TIPO_DOC|SERIE|NUMERO|FECHA|TOTAL"
+     * @param string $rucEmpresa RUC de la empresa (opcional)
+     * @param string $solUsuario Usuario SOL (opcional)
+     * @param string $claveUsuario Clave SOL (opcional)
+     * @return array
+     */
+    public static function searchCpeMultiple(array $comprobantes, $rucEmpresa = '', $solUsuario = '', $claveUsuario = '')
     {
         try {
-            $param = $type === 'ruc' ? 'ruc' : 'dni';
+            $client = new Client([
+                'verify' => false,
+                'connect_timeout' => 5,
+                'timeout' => 60,
+            ]);
 
-            $response = self::baseRequest()
-                ->post(config('configuration.api_url') . '/' . $type, [
-                    $param => $number,
-                ]);
+            $response = $client->post(config('configuration.api_url') . '/api/validacion-multiple-cpe-v2', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'ruc_empresa' => $rucEmpresa,
+                    'sol_usuario' => $solUsuario,
+                    'clave_usuario' => $claveUsuario,
+                    'comprobantes' => $comprobantes,
+                ],
+            ]);
 
-            return $response->json();
+            return json_decode($response->getBody()->getContents(), true);
 
         } catch (Throwable $e) {
-            return ApiResponse::error($e->getMessage(), $e->getCode() > 0 ? $e->getCode() : 500);
+            return ['success' => false, 'message' => $e->getMessage()];
         }
     }
 
-    private static function baseRequest(): \Illuminate\Http\Client\PendingRequest
+    /**
+     * Helper: construye el string de comprobante para searchCpeMultiple.
+     *
+     * @param string $ruc
+     * @param string $tipoDoc
+     * @param string $serie
+     * @param string|int $numero
+     * @param string $fecha formato yyyy-mm-dd
+     * @param string|float $total
+     * @return string "RUC|TIPO_DOC|SERIE|NUMERO|FECHA|TOTAL"
+     */
+    public static function buildCpeString($ruc, $tipoDoc, $serie, $numero, $fecha, $total)
     {
-        return Http::withOptions(['verify' => false])
-            ->withToken(config('configuration.api_token'))
-            ->withHeaders([
-                'x-app-version' => config('version.version', ''),
-                'x-app-build' => config('version.build', ''),
-            ])
-            ->connectTimeout(5)
-            ->timeout(10);
+        return implode('|', [$ruc, $tipoDoc, $serie, $numero, $fecha, $total]);
+    }
+
+    /**
+     * @param string $date
+     * @return mixed
+     */
+    public static function searchExchangeRateSaleWithInput($date)
+    {
+        try {
+            $client = new Client([
+                'verify' => false,
+                'connect_timeout' => 3,
+                'timeout' => 5,
+            ]);
+
+            $response = $client->post(config('configuration.api_url') . '/api/tipo_de_cambio', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
+                    'x-app-version' => config('version.version', ''),
+                    'x-app-build' => config('version.build', ''),
+                    'Accept' => 'application/json',
+                ],
+                'json' => [
+                    'fecha' => $date,
+                ],
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
+
+        } catch (Throwable $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
     }
 }

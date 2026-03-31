@@ -11,154 +11,148 @@ class Cell
     /**
      * Texto plano, admite color, tamaño y negrita.
      *
-     * @param  string  $text  Contenido textual.
-     * @param  string|null  $color  Color del texto (ej: 'red', '#1976d2', 'primary').
-     * @param  string|null  $size  Tamaño de fuente (ej: '14px', 'md', '1.2em').
-     * @param  bool|null  $bold  Si debe ser negrita.
+     * @param string $text
+     * @param string|null $color
+     * @param string|null $size
+     * @param bool|null $bold
+     * @return array
      */
-    public static function text(
-        string $text,
-        ?string $color = null,
-        ?string $size = null,
-        ?bool $bold = null
-    ): array {
+    public static function text($text, $color = null, $size = null, $bold = null)
+    {
         $arr = [
             'type_input' => 'text',
             'value' => $text,
         ];
-        if ($color) {
-            $arr['color'] = $color;
-        }
-        if ($size) {
-            $arr['size'] = $size;
-        }
-        if (! is_null($bold)) {
-            $arr['bold'] = $bold;
-        }
-
+        if ($color) $arr['color'] = $color;
+        if ($size) $arr['size'] = $size;
+        if (!is_null($bold)) $arr['bold'] = $bold;
         return $arr;
     }
 
     /**
      * Badge (etiqueta colorida).
+     *
+     * @param string $label
+     * @param string|null $color
+     * @param string|null $type
+     * @param bool $is_lighten_color
+     * @return array
      */
-    public static function badge(string $label, ?string $color = null, ?string $type = null, bool $is_lighten_color = true): array
+    public static function badge($label, $color = null, $type = null, $is_lighten_color = true)
     {
         return [
             'type_input' => 'badge',
             'label' => $label,
             'color' => $color,
             'type' => $type,
-            'is_lighten_color' => $is_lighten_color,
+            'is_lighten_color' => $is_lighten_color
         ];
     }
 
     /**
      * Ícono (ej: FontAwesome, Material).
+     *
+     * @param string $icon
+     * @param string|null $color
+     * @param string|null $tooltip
+     * @return array
      */
-    public static function icon(string $icon, ?string $color = null, ?string $tooltip = null): array
+    public static function icon($icon, $color = null, $tooltip = null)
     {
         $arr = [
             'type_input' => 'icon',
             'icon' => $icon,
         ];
-        if ($color) {
-            $arr['color'] = $color;
-        }
-        if ($tooltip) {
-            $arr['tooltip'] = $tooltip;
-        }
-
+        if ($color) $arr['color'] = $color;
+        if ($tooltip) $arr['tooltip'] = $tooltip;
         return $arr;
     }
 
     /**
      * Link (enlace), opcional con ícono.
+     *
+     * @param string $label
+     * @param string $url
+     * @param string|null $target
+     * @param string|null $icon
+     * @return array
      */
-    public static function link(string $label, string $url, ?string $target = null, ?string $icon = null): array
+    public static function link($label, $url, $target = null, $icon = null)
     {
         $arr = [
             'type_input' => 'link',
             'label' => $label,
             'url' => $url,
         ];
-        if ($target) {
-            $arr['target'] = $target;
-        }
-        if ($icon) {
-            $arr['icon'] = $icon;
-        }
-
+        if ($target) $arr['target'] = $target;
+        if ($icon) $arr['icon'] = $icon;
         return $arr;
     }
 
     /**
      * Chip (tipo badge visual, ej: Quasar, Vuetify).
+     *
+     * @param string $label
+     * @param string $color
+     * @param string|null $icon
+     * @return array
      */
-    public static function chip(string $label, string $color = 'primary', ?string $icon = null): array
+    public static function chip($label, $color = 'primary', $icon = null)
     {
         $arr = [
             'type_input' => 'chip',
             'label' => $label,
             'color' => $color,
         ];
-        if ($icon) {
-            $arr['icon'] = $icon;
-        }
-
+        if ($icon) $arr['icon'] = $icon;
         return $arr;
     }
 
     /**
      * Avatar (imagen de usuario o similar).
      *
-     * @param  string  $src  URL de la imagen
-     * @param  string|null  $alt  Texto alternativo
-     * @param  string|null  $size  Tamaño (ej: '32px')
+     * @param string $src
+     * @param string|null $alt
+     * @param string|null $size
+     * @return array
      */
-    public static function avatar(string $src, ?string $alt = null, ?string $size = null): array
+    public static function avatar($src, $alt = null, $size = null)
     {
         $arr = [
             'type_input' => 'avatar',
             'src' => $src,
         ];
-        if ($alt) {
-            $arr['alt'] = $alt;
-        }
-        if ($size) {
-            $arr['size'] = $size;
-        }
-
+        if ($alt) $arr['alt'] = $alt;
+        if ($size) $arr['size'] = $size;
         return $arr;
     }
 
     /**
      * Switch (toggle on/off).
      *
-     * @param  bool  $checked  Estado inicial
-     * @param  string|null  $color  Color del switch
-     * @param  bool  $readonly  Si solo es visual o se puede cambiar (opcional)
+     * @param bool $checked
+     * @param string|null $color
+     * @param bool $readonly
+     * @return array
      */
-    public static function switch(bool $checked, ?string $color = null, bool $readonly = true): array
+    public static function switchCell($checked, $color = null, $readonly = true)
     {
         $arr = [
             'type_input' => 'switch',
             'checked' => $checked,
             'readonly' => $readonly,
         ];
-        if ($color) {
-            $arr['color'] = $color;
-        }
-
+        if ($color) $arr['color'] = $color;
         return $arr;
     }
 
     /**
-     * Celda compuesta: varias líneas y/o elementos combinados (texto, badge, ícono, chip, etc).
+     * Celda compuesta: varias líneas y/o elementos combinados.
      *
-     * @param  array  $lines  Cada línea es un array de elementos Cell.
+     * @param array $lines
+     * @return array
      */
-    public static function composite(array $lines): array
+    public static function composite(array $lines)
     {
         return [
             'type_input' => 'composite',
@@ -169,14 +163,14 @@ class Cell
     /**
      * Multi-línea solo texto.
      *
-     * @param  array|string  $lines  Arreglo de líneas o string separado por \n.
+     * @param array|string $lines
+     * @return array
      */
-    public static function multiLine($lines): array
+    public static function multiLine($lines)
     {
         if (is_string($lines)) {
             $lines = explode("\n", $lines);
         }
-
         return [
             'type_input' => 'multi_line',
             'value' => $lines,
@@ -185,8 +179,13 @@ class Cell
 
     /**
      * Badge activo/inactivo.
+     *
+     * @param mixed $row
+     * @param string $yesText
+     * @param string $noText
+     * @return array
      */
-    public static function badgeIsActive($row, string $yesText = 'Si', string $noText = 'No'): array
+    public static function badgeIsActive($row, $yesText = 'Si', $noText = 'No')
     {
         $isActive = is_array($row)
             ? ($row['is_active'] ?? false)
@@ -198,7 +197,13 @@ class Cell
         );
     }
 
-    public static function badgeBoolean($value, string $yesText = 'Si', string $noText = 'No'): array
+    /**
+     * @param mixed $value
+     * @param string $yesText
+     * @param string $noText
+     * @return array
+     */
+    public static function badgeBoolean($value, $yesText = 'Si', $noText = 'No')
     {
         return self::badge(
             $value ? $yesText : $noText,
@@ -206,36 +211,67 @@ class Cell
         );
     }
 
-    public static function component(string $component, $modelValue, array $props = [], array $action = []): array
+    /**
+     * @param string $component
+     * @param mixed $modelValue
+     * @param array $props
+     * @param array $action
+     * @return array
+     */
+    public static function component($component, $modelValue, array $props = [], array $action = [])
     {
         return [
             'type_input' => 'component',
-            'component' => $component,    // 'XToggle' | 'XCheckbox' | 'XInput' | 'XSelect' ...
-            'modelValue' => $modelValue,  // valor inicial (boolean/string/number/array)
-            'props' => $props,            // props del componente
-            'action' => $action,          // qué hacer al cambiar
+            'component' => $component,
+            'modelValue' => $modelValue,
+            'props' => $props,
+            'action' => $action,
         ];
     }
 
-    public static function actionToggle(bool $checked, array $action, array $props = []): array
+    /**
+     * @param bool $checked
+     * @param array $action
+     * @param array $props
+     * @return array
+     */
+    public static function actionToggle($checked, array $action, array $props = [])
     {
         return self::component('XToggle', $checked, $props, $action);
     }
 
-    public static function actionCheckbox(bool $checked, array $action, array $props = []): array
+    /**
+     * @param bool $checked
+     * @param array $action
+     * @param array $props
+     * @return array
+     */
+    public static function actionCheckbox($checked, array $action, array $props = [])
     {
         return self::component('XCheckbox', $checked, $props, $action);
     }
 
-    public static function actionInput($value, array $action, array $props = []): array
+    /**
+     * @param mixed $value
+     * @param array $action
+     * @param array $props
+     * @return array
+     */
+    public static function actionInput($value, array $action, array $props = [])
     {
         return self::component('XInput', $value, $props, $action);
     }
 
-    public static function actionSelect($value, array $options, array $action, array $props = []): array
+    /**
+     * @param mixed $value
+     * @param array $options
+     * @param array $action
+     * @param array $props
+     * @return array
+     */
+    public static function actionSelect($value, array $options, array $action, array $props = [])
     {
         $props['options'] = $options;
-
         return self::component('XSelect', $value, $props, $action);
     }
 }

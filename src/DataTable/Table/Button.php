@@ -9,21 +9,22 @@ use JsonSerializable;
  */
 class Button implements JsonSerializable
 {
-    protected ?string $label;
-
-    protected ?string $icon;
-
-    protected ?string $action;
-
-    protected ?string $color;
-
-    protected bool $disable;
-
-    protected ?string $url;
-
-    protected string $size;
-
-    protected ?string $tooltip;
+    /** @var string|null */
+    protected $label;
+    /** @var string|null */
+    protected $icon;
+    /** @var string|null */
+    protected $action;
+    /** @var string|null */
+    protected $color;
+    /** @var bool */
+    protected $disable;
+    /** @var string|null */
+    protected $url;
+    /** @var string */
+    protected $size;
+    /** @var string|null */
+    protected $tooltip;
 
     /**
      * Constructor: inicializa los valores por defecto.
@@ -42,96 +43,116 @@ class Button implements JsonSerializable
 
     /**
      * Crea una nueva instancia de Button.
+     *
+     * @return self
      */
-    public static function make(): self
+    public static function make()
     {
-        return new self;
+        return new self();
     }
 
     /**
      * Define el texto (etiqueta) del botón.
+     *
+     * @param string|null $label
+     * @return self
      */
-    public function label(?string $label): self
+    public function label($label)
     {
         $this->label = $label;
-
         return $this;
     }
 
     /**
      * Define el icono del botón (usa FontAwesome por defecto).
+     *
+     * @param string $icon
+     * @return self
      */
-    public function icon(string $icon): self
+    public function icon($icon)
     {
-        $this->icon = 'fal fa-'.$icon;
-
+        $this->icon = 'fal fa-' . $icon;
         return $this;
     }
 
     /**
      * Define la acción que representa el botón (por ejemplo: new, edit, delete).
+     *
+     * @param string $action
+     * @return self
      */
-    public function action(string $action): self
+    public function action($action)
     {
         $this->action = $action;
-
         return $this;
     }
 
     /**
      * Define el color principal del botón (ejemplo: primary, red, green).
+     *
+     * @param string $color
+     * @return self
      */
-    public function color(string $color): self
+    public function color($color)
     {
         $this->color = $color;
-
         return $this;
     }
 
     /**
      * Establece si el botón estará deshabilitado.
+     *
+     * @param bool $disable
+     * @return self
      */
-    public function disable(bool $disable): self
+    public function disable($disable)
     {
         $this->disable = $disable;
-
         return $this;
     }
 
     /**
      * Define la URL asociada al botón (puede ser null si no aplica).
+     *
+     * @param string|null $url
+     * @return self
      */
-    public function url(?string $url): self
+    public function url($url)
     {
         $this->url = $url;
-
         return $this;
     }
 
     /**
      * Define el tamaño del botón (por defecto: 14px).
+     *
+     * @param string $size
+     * @return self
      */
-    public function size(string $size): self
+    public function size($size)
     {
         $this->size = $size;
-
         return $this;
     }
 
     /**
      * Define el texto del tooltip (ayuda) para el botón.
+     *
+     * @param string|null $tooltip
+     * @return self
      */
-    public function tooltip(?string $tooltip): self
+    public function tooltip($tooltip)
     {
         $this->tooltip = $tooltip;
-
         return $this;
     }
 
     /**
      * Devuelve el botón como array asociativo (para APIs o frontend).
+     *
+     * @return array
      */
-    public function toArray(): array
+    public function toArray()
     {
         return [
             'label' => $this->label,
@@ -147,16 +168,23 @@ class Button implements JsonSerializable
 
     /**
      * Permite serializar directamente el botón a JSON.
+     *
+     * @return array
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize()
     {
         return $this->toArray();
     }
 
     /**
      * Botón preconfigurado para agregar nuevo (con parámetros opcionales).
+     *
+     * @param string|null $label
+     * @param string|null $url
+     * @param string|null $tooltip
+     * @return self
      */
-    public static function newButton(?string $label = null, ?string $url = null, ?string $tooltip = 'Nuevo'): self
+    public static function newButton($label = null, $url = null, $tooltip = 'Nuevo')
     {
         return self::make()
             ->label($label)
@@ -169,8 +197,13 @@ class Button implements JsonSerializable
 
     /**
      * Botón preconfigurado para editar (con parámetros opcionales).
+     *
+     * @param string|null $label
+     * @param string|null $url
+     * @param string|null $tooltip
+     * @return self
      */
-    public static function editButton(?string $label = 'Editar', ?string $url = null, ?string $tooltip = 'Editar'): self
+    public static function editButton($label = 'Editar', $url = null, $tooltip = 'Editar')
     {
         return self::make()
             ->label($label)
@@ -183,12 +216,17 @@ class Button implements JsonSerializable
 
     /**
      * Botón preconfigurado para duplicar (con parámetros opcionales).
+     *
+     * @param string|null $label
+     * @param string|null $url
+     * @param string|null $tooltip
+     * @return self
      */
-    public static function duplicateButton(?string $label = 'Duplicar', ?string $url = null, ?string $tooltip = 'Duplicar'): self
+    public static function duplicateButton($label = 'Duplicar', $url = null, $tooltip = 'Duplicar')
     {
         return self::make()
             ->label($label)
-            ->icon('copy')
+            ->icon('duplicate')
             ->action('duplicate')
             ->color('default')
             ->url($url)
@@ -197,11 +235,14 @@ class Button implements JsonSerializable
 
     /**
      * Botón preconfigurado para refrescar (con parámetros opcionales).
+     *
+     * @param string|null $url
+     * @param string|null $tooltip
+     * @return self
      */
-    public static function refreshButton(?string $url = null, ?string $tooltip = ''): self
+    public static function refreshButton($url = null, $tooltip = '')
     {
         $tooltip = $tooltip === '' ? __('refresh') : $tooltip;
-
         return self::make()
             ->icon('arrows-rotate')
             ->action('refresh')
@@ -212,8 +253,13 @@ class Button implements JsonSerializable
 
     /**
      * Botón preconfigurado para exportar (con parámetros opcionales).
+     *
+     * @param string|null $label
+     * @param string|null $url
+     * @param string|null $tooltip
+     * @return self
      */
-    public static function exportButton(?string $label = 'Exportar', ?string $url = null, ?string $tooltip = 'Exportar'): self
+    public static function exportButton($label = 'Exportar', $url = null, $tooltip = 'Exportar')
     {
         return self::make()
             ->label($label)
@@ -226,8 +272,13 @@ class Button implements JsonSerializable
 
     /**
      * Botón preconfigurado para eliminar (con parámetros opcionales).
+     *
+     * @param string|null $label
+     * @param string|null $url
+     * @param string|null $tooltip
+     * @return self
      */
-    public static function deleteButton(?string $label = 'Eliminar', ?string $url = null, ?string $tooltip = 'Eliminar'): self
+    public static function deleteButton($label = 'Eliminar', $url = null, $tooltip = 'Eliminar')
     {
         return self::make()
             ->label($label)
@@ -239,42 +290,15 @@ class Button implements JsonSerializable
     }
 
     /**
-     * Botón preconfigurado para ver detalle (con parámetros opcionales).
-     */
-    public static function viewButton(?string $label = 'Ver', ?string $url = null, ?string $tooltip = 'Ver'): self
-    {
-        return self::make()
-            ->label($label)
-            ->icon('eye')
-            ->action('view')
-            ->color('default')
-            ->url($url)
-            ->tooltip($tooltip);
-    }
-
-    /**
      * Botón que cambia el estado activo/inactivo según la fila (row).
+     *
+     * @param mixed $row
+     * @param string|null $label
+     * @param string|null $url
+     * @param string|null $tooltip
+     * @return self
      */
-    public static function activeButton($row, ?string $label = null, ?string $url = null, ?string $tooltip = null): self
-    {
-        $isActive = is_array($row) ? ($row['is_active'] ?? false) : ($row->is_active ?? false);
-        $icon = $isActive ? 'shield-xmark' : 'shield-check';
-        $color = $isActive ? 'red' : 'green';
-        $defaultLabel = $isActive ? 'Desactivar' : 'Activar';
-
-        return self::make()
-            ->label($label ?? $defaultLabel)
-            ->icon($icon)
-            ->action('active')
-            ->color($color)
-            ->url($url)
-            ->tooltip($tooltip ?? $defaultLabel);
-    }
-
-    /**
-     * Botón de estado activo/inactivo mostrando solo el icono (sin label).
-     */
-    public static function activeButtonOnlyIcon($row, ?string $url = null, ?string $tooltip = null): self
+    public static function activeButton($row, $label = null, $url = null, $tooltip = 'Cambiar estado')
     {
         $isActive = is_array($row) ? ($row['is_active'] ?? false) : ($row->is_active ?? false);
         $icon = $isActive ? 'shield-xmark' : 'shield-check';
@@ -282,14 +306,18 @@ class Button implements JsonSerializable
         $defaultTooltip = $isActive ? 'Desactivar' : 'Activar';
 
         return self::make()
+            ->label($label)
             ->icon($icon)
             ->action('active')
             ->color($color)
             ->url($url)
-            ->tooltip($tooltip ?? $defaultTooltip);
+            ->tooltip($tooltip !== null ? $tooltip : $defaultTooltip);
     }
 
-    public static function separator(): array
+    /**
+     * @return array
+     */
+    public static function separator()
     {
         return ['type' => 'separator'];
     }

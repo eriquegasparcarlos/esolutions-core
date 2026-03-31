@@ -19,12 +19,12 @@ trait FilterTrait
 
         switch ($period) {
             case 'month':
-                $dStart = Carbon::parse($monthStart.'-01')->format('Y-m-d');
-                $dEnd = Carbon::parse($monthStart.'-01')->endOfMonth()->format('Y-m-d');
+                $dStart = Carbon::parse($monthStart. '-01')->format('Y-m-d');
+                $dEnd = Carbon::parse($monthStart . '-01')->endOfMonth()->format('Y-m-d');
                 break;
             case 'between_months':
-                $dStart = Carbon::parse($monthStart.'-01')->format('Y-m-d');
-                $dEnd = Carbon::parse($monthEnd.'-01')->endOfMonth()->format('Y-m-d');
+                $dStart = Carbon::parse($monthStart . '-01')->format('Y-m-d');
+                $dEnd = Carbon::parse($monthEnd . '-01')->endOfMonth()->format('Y-m-d');
                 break;
             case 'date':
                 $dStart = $dateStart;

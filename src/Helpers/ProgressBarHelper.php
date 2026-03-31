@@ -6,10 +6,15 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
 class ProgressBarHelper
 {
-    protected int $barLength;
-    protected ConsoleOutput $output;
+    /** @var int */
+    protected $barLength;
+    /** @var ConsoleOutput */
+    protected $output;
 
-    public function __construct(int $barLength = 20)
+    /**
+     * @param int $barLength
+     */
+    public function __construct($barLength = 20)
     {
         $this->barLength = $barLength;
         $this->output = new ConsoleOutput();
@@ -22,8 +27,9 @@ class ProgressBarHelper
      * @param int $total Total de registros
      * @param string $status Estado: success, error, warning, info
      * @param string|null $message Mensaje adicional a mostrar
+     * @return void
      */
-    public function render(int $processed, int $total, string $status = 'success', ?string $message = null): void
+    public function render($processed, $total, $status = 'success', $message = null)
     {
         if ($total === 0) {
             $this->output->writeln('<fg=yellow>No hay elementos a procesar.</>');
@@ -40,12 +46,20 @@ class ProgressBarHelper
         $bar = $filled . $empty;
         $percent = number_format($percentRaw * 100, 1);
 
-        $color = match ($status) {
-            'success' => 'green',
-            'error' => 'red',
-            'warning' => 'yellow',
-            default => 'white',
-        };
+        switch ($status) {
+            case 'success':
+                $color = 'green';
+                break;
+            case 'error':
+                $color = 'red';
+                break;
+            case 'warning':
+                $color = 'yellow';
+                break;
+            default:
+                $color = 'white';
+                break;
+        }
 
         $output = "<fg={$color}>Progreso: [{$bar}] {$processed}/{$total} ({$percent}%)</>";
 

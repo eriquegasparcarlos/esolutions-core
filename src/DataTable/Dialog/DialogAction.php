@@ -9,9 +9,12 @@ class DialogAction
     /**
      * Genera información para la eliminación de un modelo.
      *
-     * @param  string  $type  Singular del tipo de registro (ejemplo: 'el usuario', 'el cliente', 'la empresa')
+     * @param Model $record
+     * @param string $nameField
+     * @param string $type Singular del tipo de registro (ejemplo: 'el usuario', 'el cliente', 'la empresa')
+     * @return array
      */
-    public static function getDeleteRecordActionData(Model $record, string $nameField = 'name', string $type = 'registro', bool $verifyPassword = false): array
+    public static function getDeleteRecordActionData(Model $record, string $nameField = 'name', string $type = 'registro'): array
     {
         $name = $record->{$nameField};
 
@@ -22,18 +25,21 @@ class DialogAction
             'button_color' => 'red',
             'icon' => 'triangle-exclamation',
             'icon_color' => 'red',
-            'verify_password' => $verifyPassword,
+            'verify_password' => true
         ];
     }
 
     /**
      * Genera información para el cambio de estado activo/inactivo de un modelo.
      *
-     * @param  string  $type  Singular del tipo de registro (ejemplo: 'usuario', 'cliente')
+     * @param Model $record
+     * @param string $nameField
+     * @param string $type Singular del tipo de registro (ejemplo: 'usuario', 'cliente')
+     * @return array
      */
-    public static function getActiveRecordActionData(Model $record, string $nameField = 'name', string $type = 'registro', bool $verifyPassword = false): array
+    public static function getActiveRecordActionData(Model $record, string $nameField = 'name', string $type = 'registro'): array
     {
-        $isActive = (bool) $record->is_active;
+        $isActive = (bool)$record->is_active;
         $name = $record->{$nameField};
 
         return [
@@ -45,7 +51,7 @@ class DialogAction
             'button_color' => $isActive ? 'red' : 'green',
             'icon' => $isActive ? 'shield-xmark' : 'shield-check',
             'icon_color' => $isActive ? 'red' : 'green',
-            'verify_password' => $verifyPassword,
+            'verify_password' => true
         ];
     }
 }

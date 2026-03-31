@@ -2,7 +2,7 @@
 
 namespace App\ESolutions\DataTable\Traits;
 
-use App\Models\ConfigurationDataTable;
+use Modules\System\Models\ConfigurationDataTable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -10,28 +10,42 @@ trait PaginationSystemTrait
 {
     use PaginationBaseTrait;
 
-    protected function defaultModelQuery(): Builder
+    /**
+     * @return Builder
+     */
+    protected function defaultModelQuery()
     {
         return ConfigurationDataTable::query();
     }
 
-    public function initTable(): array
+    /**
+     * @return array
+     */
+    public function initTable()
     {
         return $this->initTableBase($this->defaultModelQuery());
     }
 
-    public function updatePagination(Request $request): void
+    /**
+     * @param Request $request
+     * @return void
+     */
+    public function updatePagination(Request $request)
     {
         $this->updateConfigurationDataTableBase($this->defaultModelQuery(), $request);
     }
 
-    public function updateVisibleColumns(Request $request): array
+    /**
+     * @param Request $request
+     * @return array
+     */
+    public function updateVisibleColumns(Request $request)
     {
         $this->updateVisibleColumnsWithDataBase($this->defaultModelQuery(), $request->all());
 
         return [
             'success' => true,
-            'message' => 'Actualización satisfactoria',
+            'message' => 'Actualización satisfactoria'
         ];
     }
 }
