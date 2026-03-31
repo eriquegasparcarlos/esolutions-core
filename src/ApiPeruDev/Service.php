@@ -13,10 +13,7 @@ class Service extends Controller
     public function searchRuc(Request $request)
     {
         try {
-            $response = Http::withOptions(['verify' => false])
-                ->withToken(config('configuration.api_token'))
-                ->connectTimeout(5)
-                ->timeout(10)
+            $response = self::baseRequest()
                 ->post(config('configuration.api_url') . '/ruc', [
                     'ruc' => $request->input('number'),
                 ]);
@@ -31,10 +28,7 @@ class Service extends Controller
     public function searchDni(Request $request)
     {
         try {
-            $response = Http::withOptions(['verify' => false])
-                ->withToken(config('configuration.api_token'))
-                ->connectTimeout(5)
-                ->timeout(10)
+            $response = self::baseRequest()
                 ->post(config('configuration.api_url') . '/dni', [
                     'dni' => $request->input('number'),
                 ]);
@@ -51,10 +45,7 @@ class Service extends Controller
         try {
             $param = $type === 'ruc' ? 'ruc' : 'dni';
 
-            $response = Http::withOptions(['verify' => false])
-                ->withToken(config('configuration.api_token'))
-                ->connectTimeout(5)
-                ->timeout(10)
+            $response = self::baseRequest()
                 ->post(config('configuration.api_url') . '/' . $type, [
                     $param => $number,
                 ]);
@@ -64,5 +55,17 @@ class Service extends Controller
         } catch (Throwable $e) {
             return ApiResponse::error($e->getMessage(), $e->getCode() > 0 ? $e->getCode() : 500);
         }
+    }
+
+    private static function baseRequest(): \Illuminate\Http\Client\PendingRequest
+    {
+        return Http::withOptions(['verify' => false])
+            ->withToken(config('configuration.api_token'))
+            ->withHeaders([
+                'x-app-version' => config('version.version', ''),
+                'x-app-build' => config('version.build', ''),
+            ])
+            ->connectTimeout(5)
+            ->timeout(10);
     }
 }
