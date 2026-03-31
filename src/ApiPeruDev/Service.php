@@ -53,7 +53,10 @@ class Service extends Controller
             return $response->json();
 
         } catch (Throwable $e) {
-            return ApiResponse::error($e->getMessage(), $e->getCode() > 0 ? $e->getCode() : 500);
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+            ];
         }
     }
 
