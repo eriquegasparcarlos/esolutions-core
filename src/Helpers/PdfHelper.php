@@ -90,7 +90,7 @@ class PdfHelper
             ]);
 
             // Ejecutable wkhtmltopdf en Windows
-            if (isWindows()) {
+            if (PHP_OS_FAMILY === 'Windows') {
                 $pdf->binary = public_path('vendor/wkhtmltopdf.exe');
             }
             foreach ($htmlBody as $hb) {
