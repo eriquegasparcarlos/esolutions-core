@@ -19,7 +19,8 @@
             "App\\ESolutions\\": "src/"
         },
         "files": [
-            "src/Helpers/Helpers.php"
+            "src/Helpers/Helpers.php",
+            "src/Helpers/LogHelper.php"
         ]
     },
     "minimum-stability": "stable"
