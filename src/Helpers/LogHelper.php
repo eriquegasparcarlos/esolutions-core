@@ -10,7 +10,7 @@ if (!function_exists('logUserException')) {
      * @param Request|null $request
      * @return void
      */
-    function logUserException(Throwable $e, Request $request = null): void
+    function logUserException(Throwable $e, ?Request $request = null): void
     {
         $request = $request ?: request();
         $user = auth()->user();
