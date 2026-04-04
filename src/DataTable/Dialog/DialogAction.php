@@ -27,6 +27,22 @@ class DialogAction
     }
 
     /**
+     * Genera información genérica para una acción personalizada.
+     */
+    public static function getActionData(string $title, string $description, array $options = []): array
+    {
+        return array_merge([
+            'title' => $title,
+            'description' => $description,
+            'button_label_submit' => __('confirm'),
+            'button_color' => 'primary',
+            'icon' => 'circle-info',
+            'icon_color' => 'primary',
+            'verify_password' => false,
+        ], $options);
+    }
+
+    /**
      * Genera información para el cambio de estado activo/inactivo de un modelo.
      *
      * @param  string  $type  Singular del tipo de registro (ejemplo: 'usuario', 'cliente')
