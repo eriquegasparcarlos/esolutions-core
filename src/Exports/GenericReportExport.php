@@ -7,6 +7,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -22,6 +23,7 @@ class GenericReportExport implements
     WithStyles,
     WithEvents,
     ShouldAutoSize,
+    WithColumnWidths,
     WithCustomStartCell
 {
     protected $data;
@@ -30,6 +32,7 @@ class GenericReportExport implements
     protected $totalsRow;
     protected $companyName;
     protected $companyRuc;
+    protected $columns;
 
     /** Fila donde inician los headers de columna (depende de si hay cabecera empresa) */
     protected $headerRow;
@@ -41,6 +44,7 @@ class GenericReportExport implements
      * @param array  $totalsRow   Fila de totales (opcional).
      * @param string $companyName Razón social (opcional).
      * @param string $companyRuc  RUC de la empresa (opcional).
+     * @param array  $columns     Columnas con propiedades Excel (excel_width, excel_format, etc.).
      */
     public function __construct(
         array $data,
@@ -48,7 +52,8 @@ class GenericReportExport implements
         string $title = 'Reporte',
         array $totalsRow = [],
         string $companyName = '',
-        string $companyRuc = ''
+        string $companyRuc = '',
+        array $columns = []
     ) {
         $this->data = $data;
         $this->headings = $headings;
@@ -56,6 +61,7 @@ class GenericReportExport implements
         $this->totalsRow = $totalsRow;
         $this->companyName = $companyName;
         $this->companyRuc = $companyRuc;
+        $this->columns = $columns;
         // Si hay datos de empresa: fila 1 empresa, fila 2 RUC, fila 3 título, fila 4 headers
         // Si no: fila 1 título, fila 2 headers (comportamiento original)
         $this->headerRow = $this->hasCompanyHeader() ? 4 : 2;
@@ -83,6 +89,19 @@ class GenericReportExport implements
     public function startCell(): string
     {
         return 'A' . $this->headerRow;
+    }
+
+    public function columnWidths(): array
+    {
+        $widths = [];
+        foreach ($this->columns as $i => $col) {
+            $colLetter = Coordinate::stringFromColumnIndex($i + 1);
+            $w = is_array($col) ? ($col['excel_width'] ?? null) : null;
+            if ($w) {
+                $widths[$colLetter] = $w;
+            }
+        }
+        return $widths;
     }
 
     public function registerEvents(): array
@@ -203,11 +222,37 @@ class GenericReportExport implements
             ],
         ]);
 
-        // Datos
+        // Datos: alineación vertical base
         $dataStart = $hr + 1;
         $sheet->getStyle("A{$dataStart}:{$lastCol}{$lastRow}")
             ->getAlignment()
-            ->setWrapText(true)
             ->setVertical(Alignment::VERTICAL_CENTER);
+
+        // Estilos por columna (alineación horizontal, formato numérico, wrap)
+        foreach ($this->columns as $i => $col) {
+            if (!is_array($col)) continue;
+            $colLetter = Coordinate::stringFromColumnIndex($i + 1);
+            $range = "{$colLetter}{$dataStart}:{$colLetter}{$lastRow}";
+
+            // Alineación horizontal
+            $align = $col['align'] ?? 'left';
+            $excelAlign = Alignment::HORIZONTAL_LEFT;
+            if ($align === 'right') {
+                $excelAlign = Alignment::HORIZONTAL_RIGHT;
+            } elseif ($align === 'center') {
+                $excelAlign = Alignment::HORIZONTAL_CENTER;
+            }
+            $sheet->getStyle($range)->getAlignment()->setHorizontal($excelAlign);
+
+            // Formato numérico
+            if (!empty($col['excel_format'])) {
+                $sheet->getStyle($range)->getNumberFormat()->setFormatCode($col['excel_format']);
+            }
+
+            // Wrap text
+            if (!empty($col['excel_wrap'])) {
+                $sheet->getStyle($range)->getAlignment()->setWrapText(true);
+            }
+        }
     }
 }

@@ -37,9 +37,17 @@ trait ExcelTrait
         // 1. Aplica el resource y convierte a array
         $records = collect((new $resource($query->get()))->jsonSerialize());
 
-        // 2. Filtra columnas a mostrar
-        $filteredColumns = array_filter($columns, function ($c) use ($exclude) {
-            return !in_array($c['name'], $exclude);
+        // 2. Filtra columnas: por select_columns del frontend, o todas menos excluidas
+        $selectColumns = $request->input('select_columns');
+
+        $filteredColumns = array_filter($columns, function ($c) use ($exclude, $selectColumns) {
+            if (in_array($c['name'], $exclude)) {
+                return false;
+            }
+            if (!empty($selectColumns) && is_array($selectColumns)) {
+                return in_array($c['name'], $selectColumns);
+            }
+            return true;
         });
         $fields = array_column($filteredColumns, 'name');
         $headers = array_column($filteredColumns, 'label');
@@ -131,7 +139,10 @@ trait ExcelTrait
         })->toArray();
 
         // 4. Exporta usando el Export genérico
-        $response = Excel::download(new GenericReportExport($data, $headers, $title), $filename);
+        $response = Excel::download(
+            new GenericReportExport($data, $headers, $title, [], '', '', array_values($filteredColumns)),
+            $filename
+        );
         $response->headers->set('Access-Control-Expose-Headers', 'Content-Disposition');
         return $response;
     }

@@ -32,6 +32,15 @@ class Column implements JsonSerializable
     /** @var bool Indica si la columna es sumable en exportaciones */
     public $summable = false;
 
+    /** @var int|null Ancho fijo de columna en Excel (caracteres). Null = auto-size */
+    public $excel_width = null;
+
+    /** @var string|null Formato numérico Excel (ej: '#,##0.00', '0', 'dd/mm/yyyy') */
+    public $excel_format = null;
+
+    /** @var bool Wrap text en Excel para celdas con contenido multilínea */
+    public $excel_wrap = false;
+
     /**
      * Constructor principal, solo requiere el nombre de la columna.
      */
@@ -181,6 +190,42 @@ class Column implements JsonSerializable
     }
 
     /**
+     * Define el ancho fijo de la columna en Excel (en caracteres).
+     *
+     * @param int $width
+     * @return self
+     */
+    public function excelWidth($width)
+    {
+        $this->excel_width = $width;
+        return $this;
+    }
+
+    /**
+     * Define el formato numérico en Excel (ej: '#,##0.00', '0', 'dd/mm/yyyy').
+     *
+     * @param string $format
+     * @return self
+     */
+    public function excelFormat($format)
+    {
+        $this->excel_format = $format;
+        return $this;
+    }
+
+    /**
+     * Activa wrap text en Excel para celdas con contenido multilínea.
+     *
+     * @param bool $wrap
+     * @return self
+     */
+    public function excelWrap($wrap = true)
+    {
+        $this->excel_wrap = $wrap;
+        return $this;
+    }
+
+    /**
      * Indica si la columna está "bloqueada" (ej: no desplazable).
      *
      * @param bool $locked
@@ -211,6 +256,9 @@ class Column implements JsonSerializable
             'visible' => $this->visible,
             'only_export' => $this->only_export,
             'summable' => $this->summable,
+            'excel_width' => $this->excel_width,
+            'excel_format' => $this->excel_format,
+            'excel_wrap' => $this->excel_wrap,
         ];
     }
 
