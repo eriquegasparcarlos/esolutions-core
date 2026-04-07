@@ -2,12 +2,15 @@
 
 namespace App\ESolutions\ApiPeruDev;
 
+use App\Models\System\Configuration;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Throwable;
 
 class Service
 {
+    const BASE_URL = 'https://apiperu.dev';
+
     /**
      * @param Request $request
      * @return mixed
@@ -40,13 +43,8 @@ class Service
                 'timeout' => 5,
             ]);
 
-            $response = $client->post(config('configuration.api_url') . "/api/$type", [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
-                    'x-app-version' => config('version.version', ''),
-                    'x-app-build' => config('version.build', ''),
-                    'Accept' => 'application/json',
-                ],
+            $response = $client->post(self::BASE_URL . "/api/$type", [
+                'headers' => self::buildHeaders(),
                 'json' => [
                     $type => $number,
                 ],
@@ -104,13 +102,8 @@ class Service
                 'timeout' => 10,
             ]);
 
-            $response = $client->post(config('configuration.api_url') . '/api/cpe', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
-                    'x-app-version' => config('version.version', ''),
-                    'x-app-build' => config('version.build', ''),
-                    'Accept' => 'application/json',
-                ],
+            $response = $client->post(self::BASE_URL . '/api/cpe', [
+                'headers' => self::buildHeaders(),
                 'json' => [
                     'ruc_emisor' => $rucEmisor,
                     'codigo_tipo_documento' => $codigoTipoDocumento,
@@ -147,12 +140,8 @@ class Service
                 'timeout' => 60,
             ]);
 
-            $response = $client->post(config('configuration.api_url') . '/api/validacion-multiple-cpe-v2', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
-                    'Accept' => 'application/json',
-                    'Content-Type' => 'application/json',
-                ],
+            $response = $client->post(self::BASE_URL . '/api/validacion-multiple-cpe-v2', [
+                'headers' => self::buildHeaders(),
                 'json' => [
                     'ruc_empresa' => $rucEmpresa,
                     'sol_usuario' => $solUsuario,
@@ -199,13 +188,8 @@ class Service
                 'timeout' => 5,
             ]);
 
-            $response = $client->post(config('configuration.api_url') . '/api/ruc_establecimientos_anexos', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
-                    'x-app-version' => config('version.version', ''),
-                    'x-app-build' => config('version.build', ''),
-                    'Accept' => 'application/json',
-                ],
+            $response = $client->post(self::BASE_URL . '/api/ruc_establecimientos_anexos', [
+                'headers' => self::buildHeaders(),
                 'json' => [
                     'ruc' => $number,
                 ],
@@ -233,13 +217,8 @@ class Service
                 'timeout' => 5,
             ]);
 
-            $response = $client->post(config('configuration.api_url') . '/api/ruc_domicilio_fiscal', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
-                    'x-app-version' => config('version.version', ''),
-                    'x-app-build' => config('version.build', ''),
-                    'Accept' => 'application/json',
-                ],
+            $response = $client->post(self::BASE_URL . '/api/ruc_domicilio_fiscal', [
+                'headers' => self::buildHeaders(),
                 'json' => [
                     'ruc' => $number,
                 ],
@@ -266,13 +245,8 @@ class Service
                 'timeout' => 5,
             ]);
 
-            $response = $client->post(config('configuration.api_url') . '/api/puertos', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
-                    'x-app-version' => config('version.version', ''),
-                    'x-app-build' => config('version.build', ''),
-                    'Accept' => 'application/json',
-                ],
+            $response = $client->post(self::BASE_URL . '/api/puertos', [
+                'headers' => self::buildHeaders(),
             ]);
 
             return json_decode($response->getBody()->getContents(), true);
@@ -296,13 +270,8 @@ class Service
                 'timeout' => 5,
             ]);
 
-            $response = $client->post(config('configuration.api_url') . '/api/aeropuertos', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
-                    'x-app-version' => config('version.version', ''),
-                    'x-app-build' => config('version.build', ''),
-                    'Accept' => 'application/json',
-                ],
+            $response = $client->post(self::BASE_URL . '/api/aeropuertos', [
+                'headers' => self::buildHeaders(),
             ]);
 
             return json_decode($response->getBody()->getContents(), true);
@@ -327,12 +296,8 @@ class Service
                 'timeout' => 60,
             ]);
 
-            $response = $client->post(config('configuration.api_url') . '/api/validacion_multiple_cpe', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
-                    'Accept' => 'application/json',
-                    'Content-Type' => 'application/json',
-                ],
+            $response = $client->post(self::BASE_URL . '/api/validacion_multiple_cpe', [
+                'headers' => self::buildHeaders(),
                 'json' => $data,
             ]);
 
@@ -356,13 +321,8 @@ class Service
                 'timeout' => 5,
             ]);
 
-            $response = $client->post(config('configuration.api_url') . '/api/tipo_de_cambio', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
-                    'x-app-version' => config('version.version', ''),
-                    'x-app-build' => config('version.build', ''),
-                    'Accept' => 'application/json',
-                ],
+            $response = $client->post(self::BASE_URL . '/api/tipo_de_cambio', [
+                'headers' => self::buildHeaders(),
                 'json' => [
                     'fecha' => $date,
                 ],
@@ -373,5 +333,32 @@ class Service
         } catch (Throwable $e) {
             return ['success' => false, 'message' => $e->getMessage()];
         }
+    }
+
+    // ===== Helpers =====
+
+    /**
+     * Obtener token desde la configuración system.
+     *
+     * @return string
+     */
+    private static function getToken()
+    {
+        $config = Configuration::query()->select('token_apiruc')->first();
+        return $config->token_apiruc ?? '';
+    }
+
+    /**
+     * @return array
+     */
+    private static function buildHeaders()
+    {
+        return [
+            'Authorization' => 'Bearer ' . self::getToken(),
+            'x-app-version' => config('version.version', ''),
+            'x-app-build'   => config('version.build', ''),
+            'Accept'        => 'application/json',
+            'Content-Type'  => 'application/json',
+        ];
     }
 }

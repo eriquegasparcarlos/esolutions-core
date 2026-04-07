@@ -8,6 +8,8 @@ use Throwable;
 
 class Service
 {
+    const BASE_URL = 'https://ws.apiperu.dev';
+
     /**
      * Enviar PDF por WhatsApp.
      * Usa el endpoint /message/send/pdf (auto-selecciona la primera sesión conectada).
@@ -176,18 +178,17 @@ class Service
     private static function getConfig()
     {
         $config = Configuration::query()
-            ->select('ws_api_url', 'ws_api_token')
+            ->select('ws_api_token')
             ->first();
 
-        $url = $config->ws_api_url ?? '';
         $token = $config->ws_api_token ?? '';
 
-        if ($url === '' || $token === '') {
-            throw new \RuntimeException('La URL o el token de integración WhatsApp no están configurados.');
+        if ($token === '') {
+            throw new \RuntimeException('El token de integración WhatsApp no está configurado.');
         }
 
         return [
-            'url' => rtrim($url, '/'),
+            'url' => self::BASE_URL,
             'token' => $token,
         ];
     }
