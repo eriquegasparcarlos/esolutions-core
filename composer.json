@@ -1,6 +1,6 @@
 {
     "name": "esolutions/core",
-    "version": "0.1.0",
+    "version": "1.3.0",
     "description": "DataTable, Helpers, Utils, ApiPeruDev y WhatsAppApi compartidos entre proyectos ESolutions (legacy PHP 7.2+)",
     "type": "library",
     "license": "proprietary",
