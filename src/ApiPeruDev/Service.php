@@ -185,6 +185,165 @@ class Service
     }
 
     /**
+     * Consulta establecimientos anexos de un RUC en SUNAT.
+     *
+     * @param string $number RUC number
+     * @return array
+     */
+    public static function searchEstablishments($number)
+    {
+        try {
+            $client = new Client([
+                'verify' => false,
+                'connect_timeout' => 3,
+                'timeout' => 5,
+            ]);
+
+            $response = $client->post(config('configuration.api_url') . '/api/ruc_establecimientos_anexos', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
+                    'x-app-version' => config('version.version', ''),
+                    'x-app-build' => config('version.build', ''),
+                    'Accept' => 'application/json',
+                ],
+                'json' => [
+                    'ruc' => $number,
+                ],
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
+
+        } catch (Throwable $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Consulta domicilio fiscal de un RUC en SUNAT.
+     *
+     * @param string $number RUC number
+     * @return array
+     */
+    public static function searchFiscalAddress($number)
+    {
+        try {
+            $client = new Client([
+                'verify' => false,
+                'connect_timeout' => 3,
+                'timeout' => 5,
+            ]);
+
+            $response = $client->post(config('configuration.api_url') . '/api/ruc_domicilio_fiscal', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
+                    'x-app-version' => config('version.version', ''),
+                    'x-app-build' => config('version.build', ''),
+                    'Accept' => 'application/json',
+                ],
+                'json' => [
+                    'ruc' => $number,
+                ],
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
+
+        } catch (Throwable $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Consulta listado de puertos.
+     *
+     * @return array
+     */
+    public static function searchPorts()
+    {
+        try {
+            $client = new Client([
+                'verify' => false,
+                'connect_timeout' => 3,
+                'timeout' => 5,
+            ]);
+
+            $response = $client->post(config('configuration.api_url') . '/api/puertos', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
+                    'x-app-version' => config('version.version', ''),
+                    'x-app-build' => config('version.build', ''),
+                    'Accept' => 'application/json',
+                ],
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
+
+        } catch (Throwable $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Consulta listado de aeropuertos.
+     *
+     * @return array
+     */
+    public static function searchAirports()
+    {
+        try {
+            $client = new Client([
+                'verify' => false,
+                'connect_timeout' => 3,
+                'timeout' => 5,
+            ]);
+
+            $response = $client->post(config('configuration.api_url') . '/api/aeropuertos', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
+                    'x-app-version' => config('version.version', ''),
+                    'x-app-build' => config('version.build', ''),
+                    'Accept' => 'application/json',
+                ],
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
+
+        } catch (Throwable $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Validación masiva de CPE v1 (comprobantes como objetos individuales).
+     *
+     * @param array $data Array con keys: ruc_empresa, sol_usuario, clave_usuario, comprobantes
+     * @return array
+     */
+    public static function searchMassiveCpe(array $data)
+    {
+        try {
+            $client = new Client([
+                'verify' => false,
+                'connect_timeout' => 5,
+                'timeout' => 60,
+            ]);
+
+            $response = $client->post(config('configuration.api_url') . '/api/validacion_multiple_cpe', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . config('configuration.api_token'),
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => $data,
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
+
+        } catch (Throwable $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
      * @param string $date
      * @return mixed
      */
