@@ -8,7 +8,7 @@ use Throwable;
 
 class Service
 {
-    const BASE_URL = 'https://ws.apiperu.dev';
+    const BASE_URL = 'https://ws.apiperu.dev/api';
 
     /**
      * Enviar PDF por WhatsApp.
