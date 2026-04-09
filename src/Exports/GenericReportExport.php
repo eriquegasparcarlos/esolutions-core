@@ -33,6 +33,7 @@ class GenericReportExport implements
     protected $companyName;
     protected $companyRuc;
     protected $columns;
+    protected $totalsRows;
 
     /** Fila donde inician los headers de columna (depende de si hay cabecera empresa) */
     protected $headerRow;
@@ -41,10 +42,11 @@ class GenericReportExport implements
      * @param array  $data        Datos de la tabla (array de arrays).
      * @param array  $headings    Encabezados de columna.
      * @param string $title       Título grande para el reporte.
-     * @param array  $totalsRow   Fila de totales (opcional).
+     * @param array  $totalsRow   Fila de totales simple (opcional, legacy).
      * @param string $companyName Razón social (opcional).
      * @param string $companyRuc  RUC de la empresa (opcional).
      * @param array  $columns     Columnas con propiedades Excel (excel_width, excel_format, etc.).
+     * @param array  $totalsRows  Filas de totales múltiples con merge de label (opcional).
      */
     public function __construct(
         array $data,
@@ -53,7 +55,8 @@ class GenericReportExport implements
         array $totalsRow = [],
         string $companyName = '',
         string $companyRuc = '',
-        array $columns = []
+        array $columns = [],
+        array $totalsRows = []
     ) {
         $this->data = $data;
         $this->headings = $headings;
@@ -62,6 +65,7 @@ class GenericReportExport implements
         $this->companyName = $companyName;
         $this->companyRuc = $companyRuc;
         $this->columns = $columns;
+        $this->totalsRows = $totalsRows;
         // Si hay datos de empresa: fila 1 empresa, fila 2 RUC, fila 3 título, fila 4 headers
         // Si no: fila 1 título, fila 2 headers (comportamiento original)
         $this->headerRow = $this->hasCompanyHeader() ? 4 : 2;
@@ -77,6 +81,9 @@ class GenericReportExport implements
         $rows = $this->data;
         if (!empty($this->totalsRow)) {
             $rows[] = $this->totalsRow;
+        }
+        foreach ($this->totalsRows as $row) {
+            $rows[] = $row;
         }
         return $rows;
     }
@@ -178,7 +185,7 @@ class GenericReportExport implements
                     $sheet->getRowDimension(1)->setRowHeight(30);
                 }
 
-                // Estilo de la fila de totales
+                // Estilo de la fila de totales (legacy: single row)
                 if (!empty($this->totalsRow)) {
                     $totalsRowNum = count($this->data) + $this->headerRow + 1;
                     $sheet->getStyle("A{$totalsRowNum}:{$lastCol}{$totalsRowNum}")->applyFromArray([
@@ -192,6 +199,40 @@ class GenericReportExport implements
                         ],
                     ]);
                 }
+
+                // Filas de totales múltiples con merge de label
+                if (!empty($this->totalsRows)) {
+                    // Calcular cuántas columnas no-summable hay antes de la primera summable
+                    $labelSpan = 0;
+                    foreach ($this->columns as $col) {
+                        if (!empty($col['summable'])) break;
+                        $labelSpan++;
+                    }
+                    if ($labelSpan === 0) $labelSpan = 1;
+                    $mergeEndCol = Coordinate::stringFromColumnIndex($labelSpan);
+
+                    $baseRowNum = count($this->data) + $this->headerRow + (empty($this->totalsRow) ? 0 : 1);
+
+                    foreach ($this->totalsRows as $idx => $totRow) {
+                        $rowNum = $baseRowNum + $idx + 1;
+
+                        // Merge celdas del label
+                        if ($labelSpan > 1) {
+                            $sheet->mergeCells("A{$rowNum}:{$mergeEndCol}{$rowNum}");
+                        }
+
+                        // Estilo fondo verde + negrita
+                        $sheet->getStyle("A{$rowNum}:{$lastCol}{$rowNum}")->applyFromArray([
+                            'font' => ['bold' => true, 'color' => ['rgb' => '000000']],
+                            'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'e8f5e9']],
+                        ]);
+
+                        // Label alineado a la derecha
+                        $sheet->getStyle("A{$rowNum}:{$mergeEndCol}{$rowNum}")
+                            ->getAlignment()
+                            ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                    }
+                }
             },
         ];
     }
@@ -201,7 +242,7 @@ class GenericReportExport implements
         $lastColIndex = count($this->headings);
         $lastCol = Coordinate::stringFromColumnIndex($lastColIndex);
         $hr = $this->headerRow;
-        $lastRow = count($this->data) + $hr + (empty($this->totalsRow) ? 0 : 1);
+        $lastRow = count($this->data) + $hr + (empty($this->totalsRow) ? 0 : 1) + count($this->totalsRows);
 
         // Headers de columna
         $sheet->getStyle("A{$hr}:{$lastCol}{$hr}")->applyFromArray([
