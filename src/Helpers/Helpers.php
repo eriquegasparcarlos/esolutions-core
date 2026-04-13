@@ -142,14 +142,11 @@ if (!function_exists('funcNumberFormatXml')) {
     }
 }
 
-if (!function_exists('helper_get_item_image_url')) {
-    function helper_get_item_image_url($image_name, $folder)
+if (!function_exists('helper_get_upload_url')) {
+    function helper_get_upload_url(?string $name, string $folder): ?string
     {
-        if (!is_null($image_name) && $image_name !== '') {
-            $tenant_id = tenant()?->id;
-            return asset('storage/uploads/' . $tenant_id . '/' . $folder . '/' . $image_name);
-        }
-        return null;
+        if (!$name) return null;
+        return asset('uploads/' . $folder . '/' . $name);
     }
 }
 
