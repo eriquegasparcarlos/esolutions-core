@@ -60,6 +60,24 @@ class Service extends Controller
         }
     }
 
+    public static function searchExchangeRateSaleWithInput(string $date): array
+    {
+        try {
+            $response = self::baseRequest()
+                ->post(config('configuration.api_url') . '/tipo-cambio', [
+                    'fecha' => $date,
+                ]);
+
+            return $response->json();
+
+        } catch (Throwable $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+            ];
+        }
+    }
+
     private static function baseRequest(): \Illuminate\Http\Client\PendingRequest
     {
         return Http::withOptions(['verify' => false])
