@@ -19,9 +19,23 @@ class Column implements JsonSerializable
 
     public bool $sortable = false;
 
+    public ?string $sort_field = null;
+
     public bool $searchable = false;
 
     public bool $locked = false;
+
+    public bool $visible = true;
+
+    public bool $only_export = false;
+
+    public bool $summable = false;
+
+    public ?int $excel_width = null;
+
+    public ?string $excel_format = null;
+
+    public bool $excel_wrap = false;
 
     /**
      * Constructor principal, solo requiere el nombre de la columna.
@@ -96,6 +110,17 @@ class Column implements JsonSerializable
     }
 
     /**
+     * Define el nombre real de la columna en BD para ORDER BY.
+     * Usar cuando el nombre en el frontend difiere del de la BD.
+     */
+    public function sortField(string $field): self
+    {
+        $this->sort_field = $field;
+
+        return $this;
+    }
+
+    /**
      * Indica si la columna es buscable.
      */
     public function searchable(bool $searchable = true): self
@@ -116,6 +141,66 @@ class Column implements JsonSerializable
     }
 
     /**
+     * Indica si la columna es visible por defecto en la tabla.
+     */
+    public function visible(bool $visible = true): self
+    {
+        $this->visible = $visible;
+
+        return $this;
+    }
+
+    /**
+     * Marca la columna como solo-exportación (no se muestra en la tabla del frontend).
+     */
+    public function onlyExport(bool $onlyExport = true): self
+    {
+        $this->only_export = $onlyExport;
+
+        return $this;
+    }
+
+    /**
+     * Marca la columna como sumable (se incluye en fila de totales al exportar).
+     */
+    public function summable(bool $summable = true): self
+    {
+        $this->summable = $summable;
+
+        return $this;
+    }
+
+    /**
+     * Define el ancho fijo de la columna en Excel (en caracteres).
+     */
+    public function excelWidth(int $width): self
+    {
+        $this->excel_width = $width;
+
+        return $this;
+    }
+
+    /**
+     * Define el formato numérico en Excel (ej: '#,##0.00', '0', 'dd/mm/yyyy').
+     */
+    public function excelFormat(string $format): self
+    {
+        $this->excel_format = $format;
+
+        return $this;
+    }
+
+    /**
+     * Activa wrap text en Excel para celdas con contenido multilínea.
+     */
+    public function excelWrap(bool $wrap = true): self
+    {
+        $this->excel_wrap = $wrap;
+
+        return $this;
+    }
+
+    /**
      * Convierte la columna a un array asociativo para el frontend.
      */
     public function toArray(): array
@@ -126,8 +211,15 @@ class Column implements JsonSerializable
             'align' => $this->align,
             'width' => $this->width,
             'sortable' => $this->sortable,
+            'sort_field' => $this->sort_field,
             'searchable' => $this->searchable,
             'locked' => $this->locked,
+            'visible' => $this->visible,
+            'only_export' => $this->only_export,
+            'summable' => $this->summable,
+            'excel_width' => $this->excel_width,
+            'excel_format' => $this->excel_format,
+            'excel_wrap' => $this->excel_wrap,
         ];
     }
 
