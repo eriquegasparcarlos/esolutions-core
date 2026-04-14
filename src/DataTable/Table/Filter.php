@@ -55,6 +55,12 @@ class Filter implements \JsonSerializable
 
     protected bool $disableWhenParentEmpty = true;
 
+    protected bool $clearable = false;
+
+    protected bool $filterable = false;
+
+    protected ?string $searchUrl = null;
+
     protected function __construct() {}
 
     public static function make(string $name): self
@@ -190,6 +196,28 @@ class Filter implements \JsonSerializable
         return $this;
     }
 
+    public function clearable(bool $v = true): self
+    {
+        $this->clearable = $v;
+
+        return $this;
+    }
+
+    public function filterable(bool $v = true): self
+    {
+        $this->filterable = $v;
+
+        return $this;
+    }
+
+    public function searchUrl(string $url): self
+    {
+        $this->searchUrl = $url;
+        $this->filterable = true;
+
+        return $this;
+    }
+
     public function cssClass(string $class): self
     {
         $this->class = $class;
@@ -237,6 +265,9 @@ class Filter implements \JsonSerializable
             'optionLabel' => $this->optionLabel,
             'optionChildren' => $this->optionChildren,
 
+            'clearable' => $this->clearable,
+            'filterable' => $this->filterable,
+            'searchUrl' => $this->searchUrl,
             'dependsOn' => $this->dependsOn,
             'remote' => $this->remote,
             'resetOnParentChange' => $this->resetOnParentChange,
@@ -284,7 +315,23 @@ class Filter implements \JsonSerializable
             ->cssClass($class);
     }
 
-    public static function makePeriod(string $name = 'period', ?string $label = null): self
+    /**
+     * Filtro select con búsqueda remota al backend (autocomplete).
+     */
+    public static function makeSearch(string $name, string $label, string $url, string $class = 'col-6'): self
+    {
+        return self::make($name)
+            ->label($label)
+            ->type('select')
+            ->options([])
+            ->optionValue('id')
+            ->optionLabel('name')
+            ->searchUrl($url)
+            ->clearable()
+            ->cssClass($class);
+    }
+
+    public static function makePeriod(string $name = 'period', ?string $label = null, ?string $class = null): self
     {
         $periodOptions = [
             ['id' => 'month', 'name' => __('by month')],
@@ -293,7 +340,7 @@ class Filter implements \JsonSerializable
             ['id' => 'between_dates', 'name' => __('between date')],
         ];
 
-        return self::make($name)
+        $instance = self::make($name)
             ->label($label ?? __('period'))
             ->type('date')
             ->options($periodOptions)
@@ -302,6 +349,12 @@ class Filter implements \JsonSerializable
             ->dateEnd(date('Y-m-d'))
             ->monthStart(date('Y-m'))
             ->monthEnd(date('Y-m'));
+
+        if ($class) {
+            $instance->cssClass($class);
+        }
+
+        return $instance;
     }
 
     public function dependsOn(string $parentName): self
