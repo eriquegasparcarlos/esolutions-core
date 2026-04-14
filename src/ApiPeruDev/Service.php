@@ -64,7 +64,7 @@ class Service extends Controller
     {
         try {
             $response = self::baseRequest()
-                ->post(config('configuration.api_url') . '/tipo-cambio', [
+                ->post(config('configuration.api_url') . '/tipo-de-cambio', [
                     'fecha' => $date,
                 ]);
 
