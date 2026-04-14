@@ -144,8 +144,8 @@ class Column implements JsonSerializable
      */
     public static function isDefault(): self
     {
-        return self::make('is_default_text')
-            ->label(__('¿is default?'))
+        return self::make('is_default')
+            ->label(__('¿Predeterminado?'))
             ->alignCenter()
             ->width('120px')
             ->locked()
