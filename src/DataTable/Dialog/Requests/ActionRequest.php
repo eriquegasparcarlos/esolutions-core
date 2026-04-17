@@ -15,7 +15,7 @@ class ActionRequest extends FormRequest
     {
         return [
             'id' => ['required'],
-            'password' => ['string', 'required'],
+            'password' => ['nullable', 'string', 'required_if:verify_password,true'],
         ];
     }
 }
