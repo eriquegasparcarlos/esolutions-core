@@ -141,6 +141,10 @@ trait PaginationBaseTrait
      */
     protected function resolveSortField($sortByName)
     {
+        if ($sortByName === null || $sortByName === '') {
+            return 'id';
+        }
+
         if (empty($this->columns) || !is_array($this->columns)) {
             return $sortByName;
         }
