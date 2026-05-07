@@ -59,6 +59,7 @@ trait PaginationBaseTrait
             'pagination'      => $this->initPagination(),
             'headerButtons'   => $this->getHeaderButtons(),
             'selectable'      => $this->getSelectable(),
+            'bulkActions'     => $this->getBulkActions(),
         ];
     }
 
@@ -71,6 +72,17 @@ trait PaginationBaseTrait
     protected function getSelectable(): bool
     {
         return false;
+    }
+
+    /**
+     * Acciones masivas disponibles cuando hay filas seleccionadas.
+     * Sobreescribir en el DataTable trait específico para definirlas.
+     *
+     * @return array
+     */
+    protected function getBulkActions(): array
+    {
+        return [];
     }
 
     /**
