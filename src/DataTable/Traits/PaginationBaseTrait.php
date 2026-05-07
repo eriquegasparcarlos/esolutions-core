@@ -49,16 +49,28 @@ trait PaginationBaseTrait
         $this->getConfigurationDataTableBase($model);
 
         return [
-            'pageTitle' => $this->pageTitle,
+            'pageTitle'       => $this->pageTitle,
             'pageDescription' => $this->pageDescription,
-            'tableName' => $this->tableName,
-            'tableTitle' => $this->tableTitle,
-            'columns' => $this->columns,
-            'filters' => $this->filters,
-            'visibleColumns' => $this->visibleColumns,
-            'pagination' => $this->initPagination(),
-            'headerButtons' => $this->getHeaderButtons(),
+            'tableName'       => $this->tableName,
+            'tableTitle'      => $this->tableTitle,
+            'columns'         => $this->columns,
+            'filters'         => $this->filters,
+            'visibleColumns'  => $this->visibleColumns,
+            'pagination'      => $this->initPagination(),
+            'headerButtons'   => $this->getHeaderButtons(),
+            'selectable'      => $this->getSelectable(),
         ];
+    }
+
+    /**
+     * Indica si la tabla soporta selección múltiple de filas.
+     * Sobreescribir en el DataTable trait específico para activarlo.
+     *
+     * @return bool
+     */
+    protected function getSelectable(): bool
+    {
+        return false;
     }
 
     /**
