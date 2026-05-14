@@ -139,15 +139,16 @@ class CellComponent implements JsonSerializable
      * @param bool $optimistic
      * @return self
      */
-    public function api($method, $url, array $data = [], $refresh = true, $optimistic = true)
+    public function api($method, $url, array $data = [], $refresh = true, $optimistic = true, $showNotify = false)
     {
         $this->action = [
-            'type' => 'api',
-            'method' => strtolower($method),
-            'url' => $url,
-            'data' => $data,
-            'refresh' => $refresh,
-            'optimistic' => $optimistic,
+            'type'        => 'api',
+            'method'      => strtolower($method),
+            'url'         => $url,
+            'data'        => $data,
+            'refresh'     => $refresh,
+            'optimistic'  => $optimistic,
+            'showNotify'  => $showNotify,
         ];
         return $this;
     }
@@ -157,11 +158,12 @@ class CellComponent implements JsonSerializable
      * @param array $data
      * @param bool $refresh
      * @param bool $optimistic
+     * @param bool $showNotify
      * @return self
      */
-    public function apiPatch($url, array $data = [], $refresh = true, $optimistic = true)
+    public function apiPatch($url, array $data = [], $refresh = true, $optimistic = true, $showNotify = false)
     {
-        return $this->api('patch', $url, $data, $refresh, $optimistic);
+        return $this->api('patch', $url, $data, $refresh, $optimistic, $showNotify);
     }
 
     /**
@@ -169,11 +171,12 @@ class CellComponent implements JsonSerializable
      * @param array $data
      * @param bool $refresh
      * @param bool $optimistic
+     * @param bool $showNotify
      * @return self
      */
-    public function apiPost($url, array $data = [], $refresh = true, $optimistic = true)
+    public function apiPost($url, array $data = [], $refresh = true, $optimistic = true, $showNotify = false)
     {
-        return $this->api('post', $url, $data, $refresh, $optimistic);
+        return $this->api('post', $url, $data, $refresh, $optimistic, $showNotify);
     }
 
     /**
