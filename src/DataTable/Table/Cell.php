@@ -98,11 +98,12 @@ class Cell
      * @param string      $target
      * @return array
      */
-    public static function badgeLink($label, $color = null, $url = null, $target = '_blank')
+    public static function badgeLink($label, $color = null, $url = null, $target = '_blank', $isLightenColor = true)
     {
         $arr = [
-            'type_input' => 'badge_link',
-            'label'      => $label,
+            'type_input'       => 'badge_link',
+            'label'            => $label,
+            'is_lighten_color' => $isLightenColor,
         ];
         if ($color)  $arr['color']  = $color;
         if ($url)    $arr['url']    = $url;
