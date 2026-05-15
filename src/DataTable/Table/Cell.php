@@ -90,6 +90,27 @@ class Cell
     }
 
     /**
+     * Badge clicable que abre una URL.
+     *
+     * @param string      $label
+     * @param string|null $color
+     * @param string|null $url
+     * @param string      $target
+     * @return array
+     */
+    public static function badgeLink($label, $color = null, $url = null, $target = '_blank')
+    {
+        $arr = [
+            'type_input' => 'badge_link',
+            'label'      => $label,
+        ];
+        if ($color)  $arr['color']  = $color;
+        if ($url)    $arr['url']    = $url;
+        if ($target) $arr['target'] = $target;
+        return $arr;
+    }
+
+    /**
      * Chip (tipo badge visual, ej: Quasar, Vuetify).
      *
      * @param string $label
