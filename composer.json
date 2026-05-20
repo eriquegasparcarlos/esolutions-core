@@ -1,6 +1,6 @@
 {
     "name": "esolutions/core",
-    "version": "1.4.2",
+    "version": "1.4.4",
     "description": "DataTable, Helpers, Utils y ApiPeruDev compartidos entre proyectos ESolutions",
     "type": "library",
     "license": "proprietary",
