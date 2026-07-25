@@ -55,8 +55,10 @@ class Cell
 
     /**
      * Ícono (ej: FontAwesome, Material).
+     *
+     * @param  string|null  $size  Tamaño del ícono (ej: '24px', '1.5em', 'md').
      */
-    public static function icon(string $icon, ?string $color = null, ?string $tooltip = null): array
+    public static function icon(string $icon, ?string $color = null, ?string $tooltip = null, ?string $size = null): array
     {
         $arr = [
             'type_input' => 'icon',
@@ -67,6 +69,9 @@ class Cell
         }
         if ($tooltip) {
             $arr['tooltip'] = $tooltip;
+        }
+        if ($size) {
+            $arr['size'] = $size;
         }
 
         return $arr;
